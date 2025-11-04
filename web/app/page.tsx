@@ -1,189 +1,187 @@
 import { Button } from "@/components/ui/button";
-import { ProductCard } from "@/components/ui/product-card";
-import { ArrowRight, Github, ServerCog, LineChart, Shield, Database, GitBranch } from "lucide-react";
-
-const products = [
-  {
-    title: "ChainOps",
-    description: "Infrastructure-as-Code for validators. Deploy blockchain infrastructure like cloud-native systems.",
-    href: "/products/chainops",
-    icon: ServerCog,
-    gradient: "from-[#FFE66D] to-[#FDB927]",
-  },
-  {
-    title: "ChainWatch",
-    description: "Observability for decentralized systems. Know your uptime, track your health, prove your reliability.",
-    href: "/products/chainwatch",
-    icon: LineChart,
-    gradient: "from-[#4C6FFF] to-[#6B3DF4]",
-  },
-  {
-    title: "SecurityKit",
-    description: "Security and compliance for node operators. From KMS integrations to threat detection.",
-    href: "/products/securitykit",
-    icon: Shield,
-    gradient: "from-[#F05AFF] to-[#FDB927]",
-  },
-  {
-    title: "ChainETL",
-    description: "Blockchain data pipelines. Extract, transform, and load on-chain data into standardized schemas.",
-    href: "/products/chainetl",
-    icon: Database,
-    gradient: "from-[#6B3DF4] to-[#F05AFF]",
-  },
-  {
-    title: "DAOForm",
-    description: "Governance-as-Code. Off-chain coordination with on-chain execution for DAOs.",
-    href: "/products/daoform",
-    icon: GitBranch,
-    gradient: "from-[#2DD4BF] to-[#4C6FFF]",
-  },
-];
-
-const pillars = [
-  {
-    title: "Clarity → Code as Infrastructure",
-    description: "Decentralization shouldn't mean disorder. Celara brings reproducibility, security, and visibility to blockchain operations.",
-  },
-  {
-    title: "Transparency → Open Core, Not Black Box",
-    description: "Trust is earned through visibility. Celara's core is open, auditable, and community-driven.",
-  },
-  {
-    title: "Security → Trust Through Design",
-    description: "Every Celara primitive is built around operational safety — isolation, encryption, observability, compliance.",
-  },
-];
+import { ArrowRight, Github, Terminal, Eye, Lock, Database, Vote } from "lucide-react";
+import Link from "next/link";
 
 export default function Home() {
   return (
     <div className="min-h-screen">
       {/* Hero */}
-      <section className="relative overflow-hidden px-6 pt-32 pb-20">
-        <div className="absolute top-0 left-1/4 h-[500px] w-[500px] rounded-full bg-[#FFE66D]/10 blur-[120px]" />
-        <div className="absolute top-20 right-1/4 h-[500px] w-[500px] rounded-full bg-[#FDB927]/10 blur-[120px]" />
+      <section className="relative overflow-hidden px-6 pt-40 pb-32">
+        {/* Gradient mesh background */}
+        <div className="absolute inset-0 -z-10">
+          <div className="absolute top-0 left-1/4 h-[600px] w-[600px] rounded-full bg-[#FFE66D]/20 blur-[150px] animate-pulse" />
+          <div className="absolute top-40 right-1/4 h-[600px] w-[600px] rounded-full bg-[#FDB927]/20 blur-[150px] animate-pulse" style={{ animationDelay: '1s' }} />
+        </div>
         
-        <div className="relative mx-auto max-w-5xl text-center">
-          <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm backdrop-blur-sm">
-            <span className="text-[#A3A3AD]">Infrastructure for Decentralized Systems</span>
-          </div>
-          
-          <h1 className="text-5xl font-bold leading-tight tracking-tight md:text-7xl">
-            Professionalize how<br />
-            <span className="bg-gradient-to-r from-[#FFE66D] to-[#FDB927] bg-clip-text text-transparent">
-              decentralized systems
-            </span>
-            <br />are built
-          </h1>
-          
-          <p className="mx-auto mt-6 max-w-2xl text-lg text-[#A3A3AD]">
-            Modular, open-source primitives for validators, RPCs, and DAOs. From deployment to monitoring to governance automation.
-          </p>
-          
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
-            <Button size="lg" className="bg-gradient-to-r from-[#FFE66D] to-[#FDB927] text-black hover:opacity-90">
-              Get Started
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
-            <Button size="lg" variant="outline" className="border-white/20 bg-transparent hover:bg-white/5">
-              <Github className="mr-2 h-4 w-4" />
-              View on GitHub
-            </Button>
-          </div>
-        </div>
-      </section>
-
-      {/* Products */}
-      <section className="px-6 py-20">
-        <div className="mx-auto max-w-7xl">
-          <div className="mb-12">
-            <h2 className="text-3xl font-bold md:text-4xl">The Celara Stack</h2>
-            <p className="mt-3 text-lg text-[#A3A3AD]">
-              Deploy. Watch. Secure. Govern. Repeat.
+        <div className="relative mx-auto max-w-6xl">
+          <div className="text-center">
+            <h1 className="text-6xl font-bold leading-[1.1] tracking-tight md:text-8xl">
+              Infrastructure for<br />
+              <span className="bg-gradient-to-r from-[#FFE66D] via-[#FDB927] to-[#FFE66D] bg-clip-text text-transparent">
+                Decentralized Systems
+              </span>
+            </h1>
+            
+            <p className="mx-auto mt-8 max-w-2xl text-xl text-[#A3A3AD]">
+              Open-source primitives that bring DevOps discipline to blockchain infrastructure.
             </p>
-          </div>
-          
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {products.map((product) => (
-              <ProductCard key={product.title} {...product} />
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Why Celara */}
-      <section className="px-6 py-20">
-        <div className="mx-auto max-w-7xl">
-          <div className="mb-12 text-center">
-            <h2 className="text-3xl font-bold md:text-4xl">Why Celara</h2>
-            <p className="mt-3 text-lg text-[#A3A3AD]">
-              Open tools. Reliable systems. Professional-grade decentralization.
-            </p>
-          </div>
-          
-          <div className="grid gap-8 md:grid-cols-3">
-            {pillars.map((pillar, i) => (
-              <div key={i} className="rounded-xl border border-white/10 bg-[#16161A] p-8">
-                <h3 className="text-xl font-semibold">{pillar.title}</h3>
-                <p className="mt-4 text-[#A3A3AD]">{pillar.description}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Architecture */}
-      <section className="px-6 py-20">
-        <div className="mx-auto max-w-5xl">
-          <div className="rounded-2xl border border-white/10 bg-[#16161A] p-12 text-center">
-            <h2 className="text-2xl font-bold md:text-3xl">
-              Cloud had HashiCorp.<br />
-              Decentralized systems have Celara.
-            </h2>
-            <p className="mx-auto mt-4 max-w-2xl text-[#A3A3AD]">
-              Where others chase speculation, Celara builds permanence: secure, modular, open infrastructure for a world that runs on code, not custodians.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* Open Source */}
-      <section className="px-6 py-20">
-        <div className="mx-auto max-w-7xl">
-          <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-[#FFE66D]/5 to-[#FDB927]/5 p-12 text-center">
-            <h2 className="text-3xl font-bold md:text-4xl">Open Source First</h2>
-            <p className="mx-auto mt-4 max-w-2xl text-lg text-[#A3A3AD]">
-              We don't hide reliability behind NDAs — we publish it. MIT-licensed core modules, public metrics, community-driven validation.
-            </p>
-            <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
-              <Button size="lg" variant="outline" className="border-white/20 bg-transparent hover:bg-white/5">
-                <Github className="mr-2 h-4 w-4" />
-                Explore Repositories
+            
+            <div className="mt-12 flex flex-wrap items-center justify-center gap-4">
+              <Button size="lg" className="h-14 bg-gradient-to-r from-[#FFE66D] to-[#FDB927] px-8 text-base font-semibold text-black hover:opacity-90">
+                Get Started
+                <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
-              <Button size="lg" variant="outline" className="border-white/20 bg-transparent hover:bg-white/5">
-                Contribute
+              <Button size="lg" variant="outline" className="h-14 border-white/20 bg-transparent px-8 text-base hover:bg-white/5">
+                <Github className="mr-2 h-5 w-5" />
+                GitHub
               </Button>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Final CTA */}
-      <section className="px-6 py-20">
-        <div className="mx-auto max-w-4xl text-center">
-          <h2 className="text-3xl font-bold md:text-4xl">
-            Start building on Celara
+      {/* Products Grid */}
+      <section className="px-6 py-32">
+        <div className="mx-auto max-w-7xl">
+          <div className="mb-16 text-center">
+            <h2 className="text-4xl font-bold md:text-5xl">The Stack</h2>
+            <p className="mt-4 text-xl text-[#A3A3AD]">Five tools. One mission.</p>
+          </div>
+          
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {/* ChainOps */}
+            <Link href="/products/chainops" className="group relative overflow-hidden rounded-2xl border border-white/10 bg-[#16161A] p-8 transition hover:border-[#FFE66D]/50">
+              <div className="absolute inset-0 bg-gradient-to-br from-[#FFE66D]/0 to-[#FDB927]/0 transition group-hover:from-[#FFE66D]/5 group-hover:to-[#FDB927]/5" />
+              <div className="relative">
+                <div className="inline-flex rounded-xl bg-gradient-to-br from-[#FFE66D] to-[#FDB927] p-3">
+                  <Terminal className="h-6 w-6 text-black" />
+                </div>
+                <h3 className="mt-6 text-2xl font-bold">ChainOps</h3>
+                <p className="mt-3 text-[#A3A3AD]">Deploy validators like cloud infrastructure</p>
+                <div className="mt-6 inline-flex items-center gap-2 text-sm font-medium text-white">
+                  Learn more
+                  <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
+                </div>
+              </div>
+            </Link>
+
+            {/* ChainWatch */}
+            <Link href="/products/chainwatch" className="group relative overflow-hidden rounded-2xl border border-white/10 bg-[#16161A] p-8 transition hover:border-[#4C6FFF]/50">
+              <div className="absolute inset-0 bg-gradient-to-br from-[#4C6FFF]/0 to-[#6B3DF4]/0 transition group-hover:from-[#4C6FFF]/5 group-hover:to-[#6B3DF4]/5" />
+              <div className="relative">
+                <div className="inline-flex rounded-xl bg-gradient-to-br from-[#4C6FFF] to-[#6B3DF4] p-3">
+                  <Eye className="h-6 w-6 text-white" />
+                </div>
+                <h3 className="mt-6 text-2xl font-bold">ChainWatch</h3>
+                <p className="mt-3 text-[#A3A3AD]">Observability for decentralized systems</p>
+                <div className="mt-6 inline-flex items-center gap-2 text-sm font-medium text-white">
+                  Learn more
+                  <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
+                </div>
+              </div>
+            </Link>
+
+            {/* SecurityKit */}
+            <Link href="/products/securitykit" className="group relative overflow-hidden rounded-2xl border border-white/10 bg-[#16161A] p-8 transition hover:border-[#F05AFF]/50">
+              <div className="absolute inset-0 bg-gradient-to-br from-[#F05AFF]/0 to-[#FDB927]/0 transition group-hover:from-[#F05AFF]/5 group-hover:to-[#FDB927]/5" />
+              <div className="relative">
+                <div className="inline-flex rounded-xl bg-gradient-to-br from-[#F05AFF] to-[#FDB927] p-3">
+                  <Lock className="h-6 w-6 text-white" />
+                </div>
+                <h3 className="mt-6 text-2xl font-bold">SecurityKit</h3>
+                <p className="mt-3 text-[#A3A3AD]">Automated security for node operators</p>
+                <div className="mt-6 inline-flex items-center gap-2 text-sm font-medium text-white">
+                  Learn more
+                  <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
+                </div>
+              </div>
+            </Link>
+
+            {/* ChainETL */}
+            <Link href="/products/chainetl" className="group relative overflow-hidden rounded-2xl border border-white/10 bg-[#16161A] p-8 transition hover:border-[#6B3DF4]/50">
+              <div className="absolute inset-0 bg-gradient-to-br from-[#6B3DF4]/0 to-[#F05AFF]/0 transition group-hover:from-[#6B3DF4]/5 group-hover:to-[#F05AFF]/5" />
+              <div className="relative">
+                <div className="inline-flex rounded-xl bg-gradient-to-br from-[#6B3DF4] to-[#F05AFF] p-3">
+                  <Database className="h-6 w-6 text-white" />
+                </div>
+                <h3 className="mt-6 text-2xl font-bold">ChainETL</h3>
+                <p className="mt-3 text-[#A3A3AD]">Blockchain data pipelines</p>
+                <div className="mt-6 inline-flex items-center gap-2 text-sm font-medium text-white">
+                  Learn more
+                  <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
+                </div>
+              </div>
+            </Link>
+
+            {/* DAOForm */}
+            <Link href="/products/daoform" className="group relative overflow-hidden rounded-2xl border border-white/10 bg-[#16161A] p-8 transition hover:border-[#2DD4BF]/50">
+              <div className="absolute inset-0 bg-gradient-to-br from-[#2DD4BF]/0 to-[#4C6FFF]/0 transition group-hover:from-[#2DD4BF]/5 group-hover:to-[#4C6FFF]/5" />
+              <div className="relative">
+                <div className="inline-flex rounded-xl bg-gradient-to-br from-[#2DD4BF] to-[#4C6FFF] p-3">
+                  <Vote className="h-6 w-6 text-white" />
+                </div>
+                <h3 className="mt-6 text-2xl font-bold">DAOForm</h3>
+                <p className="mt-3 text-[#A3A3AD]">Governance-as-Code</p>
+                <div className="mt-6 inline-flex items-center gap-2 text-sm font-medium text-white">
+                  Learn more
+                  <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
+                </div>
+              </div>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Statement */}
+      <section className="px-6 py-32">
+        <div className="mx-auto max-w-5xl text-center">
+          <h2 className="text-4xl font-bold leading-tight md:text-6xl">
+            Cloud had HashiCorp.<br />
+            Decentralized systems<br />
+            have <span className="bg-gradient-to-r from-[#FFE66D] to-[#FDB927] bg-clip-text text-transparent">Celara</span>.
           </h2>
-          <p className="mt-4 text-lg text-[#A3A3AD]">
-            Join operators running production validators with Celara infrastructure.
+        </div>
+      </section>
+
+      {/* Open Source */}
+      <section className="px-6 py-32">
+        <div className="mx-auto max-w-7xl">
+          <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-[#FFE66D]/10 via-transparent to-[#FDB927]/10 p-16 text-center">
+            <div className="relative">
+              <h2 className="text-4xl font-bold md:text-5xl">Open Source First</h2>
+              <p className="mx-auto mt-6 max-w-2xl text-xl text-[#A3A3AD]">
+                MIT-licensed core. Public metrics. Community-driven validation.
+              </p>
+              <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
+                <Button size="lg" variant="outline" className="h-14 border-white/20 bg-transparent px-8 text-base hover:bg-white/5">
+                  <Github className="mr-2 h-5 w-5" />
+                  Explore Repositories
+                </Button>
+                <Button size="lg" variant="outline" className="h-14 border-white/20 bg-transparent px-8 text-base hover:bg-white/5">
+                  Contribute
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Final CTA */}
+      <section className="px-6 py-32">
+        <div className="mx-auto max-w-4xl text-center">
+          <h2 className="text-4xl font-bold md:text-5xl">
+            Start building
+          </h2>
+          <p className="mt-6 text-xl text-[#A3A3AD]">
+            Join operators running production validators with Celara.
           </p>
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
-            <Button size="lg" className="bg-gradient-to-r from-[#FFE66D] to-[#FDB927] text-black hover:opacity-90">
+          <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
+            <Button size="lg" className="h-14 bg-gradient-to-r from-[#FFE66D] to-[#FDB927] px-8 text-base font-semibold text-black hover:opacity-90">
               Get Started Free
-              <ArrowRight className="ml-2 h-4 w-4" />
+              <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
-            <Button size="lg" variant="outline" className="border-white/20 bg-transparent hover:bg-white/5">
-              View Documentation
+            <Button size="lg" variant="outline" className="h-14 border-white/20 bg-transparent px-8 text-base hover:bg-white/5">
+              Documentation
             </Button>
           </div>
         </div>
