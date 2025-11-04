@@ -2,8 +2,21 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --brand-bg: #0E0E11;
+  --brand-fg: #F6F7F9;
+  --card: #16161A;
+  --muted: #A3A3AD;
+  --solar: #FFE66D;
+  --corona: #FDB927;
+  --orbit: #4C6FFF;
+  --plasma: #6B3DF4;
+  --nebula: #F05AFF;
+  --teal: #2DD4BF;
+}
+
 body {
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  background: #0A0E29;
-  color: white;
+  background: var(--brand-bg);
+  color: var(--brand-fg);
 }

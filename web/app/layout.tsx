@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import Link from "next/link";
+import { Github } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -10,47 +13,14 @@ export const metadata: Metadata = {
     default: "Celara - Infrastructure for Decentralized Systems",
     template: "%s | Celara"
   },
-  description: "Modular, open-source primitives that professionalize how decentralized systems are built, monitored, and secured. Production-grade infrastructure for blockchain and Web3.",
-  keywords: ["blockchain infrastructure", "web3 infrastructure", "decentralized systems", "blockchain monitoring", "crypto infrastructure", "blockchain security", "web3 tools", "blockchain observability", "decentralized infrastructure", "blockchain devops", "crypto devops", "blockchain deployment", "web3 development tools"],
+  description: "Modular, open-source primitives that professionalize how decentralized systems are built, monitored, and secured.",
+  keywords: ["blockchain infrastructure", "web3 infrastructure", "decentralized systems"],
   authors: [{ name: "Celara" }],
-  creator: "Celara",
-  publisher: "Celara",
   openGraph: {
     type: "website",
-    locale: "en_US",
-    url: "https://celara.dev",
-    siteName: "Celara",
     title: "Celara - Infrastructure for Decentralized Systems",
-    description: "Modular, open-source primitives that professionalize how decentralized systems are built, monitored, and secured.",
-    images: [
-      {
-        url: "/og-image.png",
-        width: 1200,
-        height: 630,
-        alt: "Celara"
-      }
-    ]
+    description: "Modular, open-source primitives for blockchain infrastructure",
   },
-  twitter: {
-    card: "summary_large_image",
-    title: "Celara - Infrastructure for Decentralized Systems",
-    description: "Production-grade infrastructure for blockchain and Web3 systems.",
-    images: ["/og-image.png"]
-  },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      'max-video-preview': -1,
-      'max-image-preview': 'large',
-      'max-snippet': -1,
-    },
-  },
-  alternates: {
-    canonical: "https://celara.dev"
-  }
 };
 
 export default function RootLayout({
@@ -58,30 +28,109 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const structuredData = {
-    "@context": "https://schema.org",
-    "@type": "SoftwareApplication",
-    "name": "Celara",
-    "applicationCategory": "DeveloperApplication",
-    "description": "Modular, open-source primitives for building, monitoring, and securing decentralized systems.",
-    "url": "https://celara.dev",
-    "operatingSystem": "Cross-platform",
-    "offers": {
-      "@type": "Offer",
-      "price": "0",
-      "priceCurrency": "USD"
-    }
-  };
-
   return (
     <html lang="en">
-      <head>
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
-        />
-      </head>
-      <body className={inter.className}>{children}</body>
+      <body className={inter.className}>
+        <header className="fixed top-0 z-50 w-full border-b border-white/10 bg-[#0E0E11]/80 backdrop-blur-xl">
+          <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
+            <Link href="/" className="flex items-center gap-2.5">
+              <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-[#FFE66D] to-[#FDB927]" />
+              <span className="text-lg font-semibold">Celara</span>
+            </Link>
+            <nav className="hidden items-center gap-8 md:flex">
+              <Link href="/products" className="text-sm text-[#A3A3AD] transition hover:text-white">
+                Products
+              </Link>
+              <Link href="/open-source" className="text-sm text-[#A3A3AD] transition hover:text-white">
+                Open Source
+              </Link>
+              <Link href="https://docs.celara.dev" className="text-sm text-[#A3A3AD] transition hover:text-white">
+                Docs
+              </Link>
+              <Link href="https://github.com/celara" className="text-sm text-[#A3A3AD] transition hover:text-white">
+                <Github className="h-5 w-5" />
+              </Link>
+            </nav>
+            <Button size="sm" className="bg-gradient-to-r from-[#FFE66D] to-[#FDB927] text-black hover:opacity-90">
+              Get Started
+            </Button>
+          </div>
+        </header>
+
+        <main className="pt-16">{children}</main>
+
+        <footer className="border-t border-white/10 px-6 py-12">
+          <div className="mx-auto max-w-7xl">
+            <div className="grid gap-8 md:grid-cols-4">
+              <div>
+                <div className="flex items-center gap-2.5">
+                  <div className="h-7 w-7 rounded-lg bg-gradient-to-br from-[#FFE66D] to-[#FDB927]" />
+                  <span className="font-semibold">Celara</span>
+                </div>
+                <p className="mt-4 text-sm text-[#A3A3AD]">
+                  Infrastructure for Decentralized Systems
+                </p>
+              </div>
+              
+              <div>
+                <div className="text-sm font-semibold">Products</div>
+                <div className="mt-4 space-y-3">
+                  {["ChainOps", "ChainWatch", "SecurityKit", "ChainETL", "DAOForm"].map((item) => (
+                    <div key={item}>
+                      <Link href={`/products/${item.toLowerCase()}`} className="text-sm text-[#A3A3AD] hover:text-white">
+                        {item}
+                      </Link>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              
+              <div>
+                <div className="text-sm font-semibold">Resources</div>
+                <div className="mt-4 space-y-3">
+                  {["Documentation", "GitHub", "Discord", "Blog"].map((item) => (
+                    <div key={item}>
+                      <Link href="#" className="text-sm text-[#A3A3AD] hover:text-white">
+                        {item}
+                      </Link>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              
+              <div>
+                <div className="text-sm font-semibold">Company</div>
+                <div className="mt-4 space-y-3">
+                  {["About", "Open Source", "Contact"].map((item) => (
+                    <div key={item}>
+                      <Link href="#" className="text-sm text-[#A3A3AD] hover:text-white">
+                        {item}
+                      </Link>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+            
+            <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-white/10 pt-8 md:flex-row">
+              <p className="text-sm text-[#A3A3AD]">
+                © {new Date().getFullYear()} Celara Technologies, LLC
+              </p>
+              <div className="flex gap-6">
+                <Link href="#" className="text-sm text-[#A3A3AD] hover:text-white">
+                  Privacy
+                </Link>
+                <Link href="#" className="text-sm text-[#A3A3AD] hover:text-white">
+                  Terms
+                </Link>
+                <Link href="#" className="text-sm text-[#A3A3AD] hover:text-white">
+                  Security
+                </Link>
+              </div>
+            </div>
+          </div>
+        </footer>
+      </body>
     </html>
   );
 }
