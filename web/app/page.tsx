@@ -22,7 +22,7 @@ export default function Home() {
           </p>
           
           <p className="text-gray-500">
-            Coming Q1 2025
+            Coming December 2025
           </p>
         </div>
       </div>
