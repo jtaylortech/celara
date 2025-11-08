@@ -1,0 +1,52 @@
+"""Ethereum blockchain extractor."""
+
+import structlog
+
+from chainetl.extractors.base import BaseExtractor
+from chainetl.models.block import Block
+from chainetl.utils.rpc import RPCClient
+
+logger = structlog.get_logger()
+
+
+class EthereumExtractor(BaseExtractor):
+    """Extract data from Ethereum blockchain."""
+
+    def __init__(self, rpc_url: str) -> None:
+        """Initialize Ethereum extractor.
+
+        Args:
+            rpc_url: Ethereum RPC endpoint URL
+        """
+        self.rpc = RPCClient(rpc_url)
+        logger.info("ethereum_extractor_initialized", rpc_url=rpc_url)
+
+    def extract_block(self, block_number: int) -> Block:
+        """Extract a single block.
+
+        Args:
+            block_number: Block number to extract
+
+        Returns:
+            Block data
+
+        Raises:
+            ValueError: If block not found
+        """
+        logger.info("extracting_block", block_number=block_number)
+
+        data = self.rpc.call("eth_getBlockByNumber", [hex(block_number), False])
+
+        if data is None:
+            raise ValueError(f"Block {block_number} not found")
+
+        return Block.from_rpc(data)
+
+    def extract_latest_block_number(self) -> int:
+        """Get the latest block number.
+
+        Returns:
+            Latest block number
+        """
+        result = self.rpc.call("eth_blockNumber", [])
+        return int(result, 16)

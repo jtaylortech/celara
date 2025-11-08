@@ -22,7 +22,7 @@ Celara is the **HashiCorp of Web3** — a unified suite of infrastructure tools 
 | **[ChainOps](docs/products/chainops.md)** | Infrastructure-as-Code for validators | Planning |
 | **[ChainWatch](docs/products/chainwatch.md)** | Observability for decentralized systems | Planning |
 | **[SecurityKit](docs/products/securitykit.md)** | Automated security for node operators | Planning |
-| **[ChainETL](docs/products/chainetl.md)** | Blockchain data pipelines | Planning |
+| **[ChainETL](docs/products/chainetl.md)** | Blockchain data pipelines | **In Development** |
 | **[DAOForm](docs/products/daoform.md)** | Governance-as-Code | Planning |
 
 ---

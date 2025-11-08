@@ -1,291 +1,307 @@
-# ChainETL
+# ChainETL — Blockchain Data Pipelines
 
-**Blockchain Data Pipelines**
-
-> Extract, transform, and load on-chain data into standardized schemas for analytics and reporting.
-
----
-
-## Overview
-
-ChainETL is an open-source data pipeline that ingests on-chain data into data warehouses and lakes. It provides ready-made connectors, schema normalization, and managed hosting for blockchain analytics.
-
-**Think:** Airbyte + dbt for blockchain data.
+**Status:** In Development  
+**Owner:** Kofi  
+**Launch Target:** Q3 2026  
+**Project Location:** `/Users/jarredet/Code/projects/celara-homepage/chainetl`
 
 ---
 
-## Core Value Proposition
+## What is ChainETL?
+
+**One-liner:** Extract blockchain data to data warehouses with production-grade pipelines.
+
+ChainETL is an open-source tool that makes it easy to extract, transform, and load blockchain data into analytics-ready formats. Think of it as the **Airbyte/Fivetran for blockchain data**.
 
 ### The Problem
 
-On-chain data is powerful but difficult to operationalize:
-- Custom scripts for each chain
-- No standardized schemas
-- Difficult to maintain
-- Expensive to scale
-- Hard to reproduce
+Blockchain data is:
+- **Hard to access** — Running full nodes is expensive and complex
+- **Difficult to query** — Raw blockchain data isn't analytics-friendly
+- **Multi-chain chaos** — Every chain has different APIs and data structures
+- **Real-time challenges** — Keeping data fresh requires constant syncing
+
+Current solutions:
+- Run your own indexer (expensive, complex)
+- Use centralized APIs (rate limits, vendor lock-in)
+- Build custom scrapers (maintenance nightmare)
 
 ### The Solution
 
-ChainETL makes on-chain data operationally ready:
-- **Ready-Made Connectors** — Solana, Ethereum, Cosmos
-- **Schema Normalization** — DeFi, NFT, staking data
-- **Data Lake Support** — S3, GCS, Azure Blob
-- **Warehouse Integration** — Snowflake, BigQuery, Redshift
-- **Custom Analytics** — SQL-ready data for dashboards
-
----
-
-## Key Features
-
-### 1. Pre-Built Connectors
-
-**Supported Networks:**
-- Ethereum (blocks, transactions, logs, traces)
-- Solana (blocks, transactions, accounts, programs)
-- Cosmos SDK (blocks, transactions, validators)
-- Polygon, Arbitrum, Optimism
-- More via community contributions
-
-### 2. Schema Normalization
-
-```sql
--- Standardized DeFi schema
-SELECT
-  protocol,
-  pool_address,
-  token_in,
-  token_out,
-  amount_in,
-  amount_out,
-  trader,
-  timestamp
-FROM defi.swaps
-WHERE protocol = 'uniswap'
-  AND timestamp > '2025-01-01';
-```
-
-### 3. Flexible Destinations
-
-**Data Lakes:**
-- Amazon S3
-- Google Cloud Storage
-- Azure Blob Storage
-- MinIO (self-hosted)
-
-**Data Warehouses:**
-- Snowflake
-- Google BigQuery
-- Amazon Redshift
-- Databricks
-
-**Databases:**
-- PostgreSQL
-- MySQL
-- TimescaleDB
-
-### 4. Orchestration
-
-```yaml
-pipelines:
-  - name: solana_mainnet
-    source: solana
-    network: mainnet-beta
-    destination: snowflake
-    schedule: "*/5 * * * *"  # Every 5 minutes
-    tables:
-      - blocks
-      - transactions
-      - token_transfers
-```
+ChainETL provides:
+- **One-command setup** — `chainetl init ethereum` and you're running
+- **Multi-chain support** — Ethereum, Solana, Polygon, Arbitrum, Base, etc.
+- **Multiple destinations** — Postgres, BigQuery, Snowflake, S3, Parquet files
+- **Real-time & batch** — Stream live data or backfill historical
+- **Transform layer** — Built-in dbt models for common analytics
+- **Open source** — Apache 2.0, run anywhere
 
 ---
 
 ## Architecture
 
+### High-Level Flow
+
 ```
-┌─────────────────────────────────────────────────────┐
-│              ChainETL Orchestrator                  │
-│  (Airflow / Dagster / Prefect)                      │
-└─────────────────────────────────────────────────────┘
-                        │
-        ┌───────────────┼───────────────┐
-        │               │               │
-   ┌────▼────┐    ┌─────▼─────┐   ┌────▼────┐
-   │Ethereum │    │  Solana   │   │ Cosmos  │
-   │Connector│    │ Connector │   │Connector│
-   └────┬────┘    └─────┬─────┘   └────┬────┘
-        │               │               │
-        └───────────────┼───────────────┘
-                        │
-                   ┌────▼────┐
-                   │Transform│
-                   │ Engine  │
-                   └────┬────┘
-                        │
-        ┌───────────────┼───────────────┐
-        │               │               │
-   ┌────▼────┐    ┌─────▼─────┐   ┌────▼────┐
-   │   S3    │    │ Snowflake │   │BigQuery │
-   │         │    │           │   │         │
-   └─────────┘    └───────────┘   └─────────┘
+┌─────────────┐      ┌─────────────┐      ┌─────────────┐      ┌─────────────┐
+│  Blockchain │ ───> │   ChainETL  │ ───> │  Transform  │ ───> │ Data Warehouse│
+│   (Source)  │      │  (Extract)  │      │    (dbt)    │      │ (Destination) │
+└─────────────┘      └─────────────┘      └─────────────┘      └─────────────┘
+   Ethereum              Python CLI           SQL Models          Postgres
+   Solana                RPC Polling          Aggregations        BigQuery
+   Polygon               WebSocket            Metrics             Snowflake
 ```
 
----
+### Components
 
-## Use Cases
+**1. Extractors** (Python)
+- Connect to blockchain RPC endpoints
+- Poll for new blocks/transactions
+- Handle reorgs and retries
+- Normalize data across chains
 
-### Analytics Team
+**2. Loaders** (Python)
+- Write to various destinations
+- Handle batching and buffering
+- Ensure idempotency
+- Track sync state
 
-**Scenario:** Research team analyzing DeFi protocols
-**Solution:** Ethereum connector → BigQuery → Looker dashboards
-**Cost:** Free (OSS) + BigQuery costs
+**3. Transforms** (dbt/SQL)
+- Clean and normalize data
+- Calculate metrics (TVL, volume, fees)
+- Build dimension tables
+- Create analytics views
 
-### DAO Treasury
-
-**Scenario:** DAO tracking treasury transactions
-**Solution:** Multi-chain connectors → Snowflake → custom reports
-**Cost:** $15K/year (managed pipelines)
-
-### Crypto Fund
-
-**Scenario:** Fund analyzing on-chain metrics for investment decisions
-**Solution:** Full-chain data → data lake → ML models
-**Cost:** Custom enterprise agreement
-
----
-
-## Pricing
-
-### OSS (Free)
-
-- All connectors
-- Self-hosted orchestration
-- Community support
-
-### Managed Pipelines (Usage-Based)
-
-- $0.10-$0.50/GB processed
-- Hosted orchestration
-- Automated scaling
-- Priority support
-
-### Enterprise (Custom)
-
-- Dedicated infrastructure
-- Custom connectors
-- SLA guarantees
-- 24/7 support
+**4. CLI** (Python + Typer)
+- `chainetl init` — Setup new pipeline
+- `chainetl sync` — Start syncing data
+- `chainetl backfill` — Historical data
+- `chainetl status` — Check pipeline health
 
 ---
 
-## Getting Started
+## MVP Scope (First Version)
 
-### Prerequisites
+### Must-Have Features
 
-- Python 3.10+
-- Data warehouse account (Snowflake, BigQuery, etc.)
-- Blockchain RPC endpoint
+**Chains:**
+- Ethereum (mainnet)
+- Base (L2)
 
-### Installation
+**Data Types:**
+- Blocks
+- Transactions
+- Logs/Events
+- Traces (future)
+- Token transfers (future)
 
+**Destinations:**
+- Postgres (local development)
+- CSV/Parquet files
+- BigQuery (future)
+- Snowflake (future)
+
+**Sync Modes:**
+- Real-time (poll every block)
+- Backfill (historical range)
+- Incremental (resume from checkpoint)
+
+**CLI Commands:**
 ```bash
-pip install chainetl
-
-# Initialize project
-chainetl init my-pipeline
-
-# Configure connector
-chainetl configure \
-  --source solana \
-  --network mainnet-beta \
-  --destination snowflake
-```
-
-### Run Pipeline
-
-```bash
-# One-time sync
-chainetl sync \
-  --start-block 100000000 \
-  --end-block 100001000
-
-# Continuous sync
-chainetl sync --follow
+chainetl init ethereum --destination postgres
+chainetl sync --chain ethereum --start-block 18000000
+chainetl backfill --chain ethereum --from 17000000 --to 18000000
+chainetl status
 ```
 
 ---
 
-## Data Schemas
+## Tech Stack
 
-### Ethereum
+### Core
+- **Language:** Python 3.11+
+- **CLI Framework:** Typer (modern, type-safe)
+- **HTTP Client:** httpx (async support)
+- **Database:** SQLAlchemy (ORM) + Alembic (migrations)
+- **Config:** Pydantic Settings (type-safe config)
+- **Logging:** structlog (structured logging)
 
-**Tables:**
-- `blocks` — Block headers
-- `transactions` — Transaction details
-- `logs` — Event logs
-- `traces` — Internal transactions
-- `token_transfers` — ERC20/721/1155 transfers
+### Data Processing
+- **Serialization:** Pydantic models
+- **Batch Processing:** Pandas (optional)
+- **File Formats:** Parquet (via pyarrow)
 
-### Solana
+### Testing
+- **Framework:** pytest
+- **Mocking:** pytest-mock
+- **Coverage:** pytest-cov (>80% target)
 
-**Tables:**
-- `blocks` — Block metadata
-- `transactions` — Transaction details
-- `instructions` — Program instructions
-- `token_transfers` — SPL token transfers
-- `account_updates` — Account state changes
-
-### DeFi (Normalized)
-
-**Tables:**
-- `swaps` — DEX swaps
-- `liquidity_events` — LP adds/removes
-- `lending_events` — Borrow/lend/liquidate
-- `staking_events` — Stake/unstake
+### Development
+- **Package Manager:** uv (fast, modern)
+- **Linting:** ruff (fast, comprehensive)
+- **Type Checking:** mypy (strict mode)
+- **Formatting:** ruff format
 
 ---
 
-## Roadmap
+## Project Structure
 
-**Q1 2026:**
-- Ethereum + Solana connectors
-- Snowflake + BigQuery support
-- Basic orchestration
-
-**Q2 2026:**
-- Cosmos SDK support
-- dbt integration
-- Managed hosting beta
-
-**Q3 2026:**
-- Real-time streaming
-- Advanced transformations
-- Custom connector SDK
-
-**Q4 2026:**
-- ML-ready datasets
-- Cross-chain analytics
-- Enterprise features
+```
+chainetl/
+├── README.md                 # Project overview
+├── pyproject.toml           # Dependencies & config
+├── uv.lock                  # Lock file
+├── .python-version          # Python 3.11
+├── src/
+│   └── chainetl/
+│       ├── __init__.py
+│       ├── cli.py           # Typer CLI commands
+│       ├── config.py        # Pydantic settings
+│       ├── extractors/      # Blockchain extractors
+│       │   ├── __init__.py
+│       │   ├── base.py      # Base extractor class
+│       │   ├── ethereum.py  # Ethereum extractor
+│       │   └── base_l2.py   # Base L2 extractor
+│       ├── loaders/         # Destination loaders
+│       │   ├── __init__.py
+│       │   ├── base.py      # Base loader class
+│       │   ├── postgres.py  # Postgres loader
+│       │   └── file.py      # CSV/Parquet loader
+│       ├── models/          # Pydantic data models
+│       │   ├── __init__.py
+│       │   ├── block.py
+│       │   ├── transaction.py
+│       │   └── log.py
+│       └── utils/           # Helpers
+│           ├── __init__.py
+│           ├── rpc.py       # RPC client
+│           └── retry.py     # Retry logic
+├── tests/
+│   ├── __init__.py
+│   ├── test_extractors.py
+│   ├── test_loaders.py
+│   └── fixtures/            # Test data
+├── dbt/                     # dbt transforms (future)
+│   └── models/
+└── examples/                # Example configs
+    ├── ethereum.yaml
+    └── base.yaml
+```
 
 ---
 
-## Community
+## Development Phases
 
-- **GitHub:** [github.com/celara/chainetl](https://github.com/celara/chainetl)
-- **Discord:** [discord.gg/celara](https://discord.gg/celara)
-- **Docs:** [docs.celara.dev/chainetl](https://docs.celara.dev/chainetl)
+### Phase 1: Foundation (Weeks 1-2)
+**Goal:** Basic CLI + Ethereum extractor + Postgres loader
+
+**Tasks:**
+- [ ] Setup project structure
+- [ ] Implement CLI skeleton (init, sync, status)
+- [ ] Build Ethereum RPC client
+- [ ] Create Pydantic models (Block, Transaction, Log)
+- [ ] Implement Postgres loader
+- [ ] Write tests (>80% coverage)
+
+**Deliverable:** `chainetl sync --chain ethereum` works locally
+
+### Phase 2: Reliability (Weeks 3-4)
+**Goal:** Handle edge cases, retries, checkpointing
+
+**Tasks:**
+- [ ] Add retry logic with exponential backoff
+- [ ] Implement checkpoint system (resume from last block)
+- [ ] Handle chain reorgs
+- [ ] Add structured logging
+- [ ] Error handling and validation
+- [ ] Performance optimization (batch inserts)
+
+**Deliverable:** Runs reliably for 24+ hours without crashes
+
+### Phase 3: Multi-Chain (Weeks 5-6)
+**Goal:** Add Base L2 support
+
+**Tasks:**
+- [ ] Abstract extractor interface
+- [ ] Implement Base L2 extractor
+- [ ] Handle L2-specific fields (L1 batch info)
+- [ ] Update CLI for chain selection
+- [ ] Add chain-specific tests
+
+**Deliverable:** Support both Ethereum and Base
+
+### Phase 4: Polish (Weeks 7-8)
+**Goal:** Documentation, examples, packaging
+
+**Tasks:**
+- [ ] Write comprehensive README
+- [ ] Create example configs
+- [ ] Add CLI help text
+- [ ] Package for PyPI
+- [ ] Create demo video
+- [ ] Write launch blog post
+
+**Deliverable:** Ready for open-source launch
+
+---
+
+## Success Metrics
+
+### Technical
+- **Sync Speed:** >100 blocks/second (Ethereum)
+- **Uptime:** 99.9% (24+ hour runs)
+- **Test Coverage:** >80%
+- **Type Safety:** 100% (mypy strict)
+- **Memory Usage:** <500MB for 1M blocks
+
+### Product
+- **GitHub Stars:** 100+ in first month
+- **Active Users:** 50+ running in production
+- **Chains Supported:** 2+ (Ethereum, Base)
+- **Destinations:** 2+ (Postgres, Files)
+
+---
+
+## Learning Resources
+
+### Blockchain Basics
+- [Ethereum Whitepaper](https://ethereum.org/en/whitepaper/)
+- [How Ethereum Works](https://ethereum.org/en/developers/docs/)
+- [Base Documentation](https://docs.base.org/)
+
+### Python Development
+- [Python Type Hints](https://docs.python.org/3/library/typing.html)
+- [Pydantic Documentation](https://docs.pydantic.dev/)
+- [Typer Tutorial](https://typer.tiangolo.com/)
+- [pytest Documentation](https://docs.pytest.org/)
+
+### Data Engineering
+- [Kimball Dimensional Modeling](https://www.kimballgroup.com/data-warehouse-business-intelligence-resources/kimball-techniques/dimensional-modeling-techniques/)
+- [dbt Best Practices](https://docs.getdbt.com/guides/best-practices)
+
+---
+
+## Getting Help
+
+**Questions?** Ask in:
+- Discord: #chainetl channel (coming soon)
+- GitHub Issues: Technical questions
+- Direct: Reach out to JT
+
+**Code Reviews:**
+- Open PRs early and often
+- Tag @jtaylortech for review
+- Aim for small, focused PRs (<500 lines)
 
 ---
 
 ## Related Products
 
-- **[ChainWatch](chainwatch.md)** — Visualize ChainETL data
-- **[DAOForm](daoform.md)** — Use ChainETL for governance insights
-- **[ValidatorHub](validatorhub.md)** — Track validator economics
+- **ChainWatch** — Monitor your ChainETL pipelines
+- **ValidatorHub** — Analyze validator performance with ChainETL data
+- **NodeQuick** — Deploy the RPC nodes that ChainETL connects to
 
 ---
 
-**Ready to unlock on-chain data?**
+**Let's build the best blockchain data pipeline tool in the world.**
 
-[Get Started →](https://celara.dev/chainetl)
