@@ -9,7 +9,7 @@
 
 ---
 
-## 🎯 What is Celara?
+## What is Celara?
 
 Celara is the **HashiCorp of Web3** — a unified suite of infrastructure tools for blockchain validators, RPCs, and DAOs. From deployment to monitoring to governance automation.
 
@@ -27,7 +27,7 @@ Celara is the **HashiCorp of Web3** — a unified suite of infrastructure tools 
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Marketing Site (This Repo)
 
@@ -39,13 +39,18 @@ npm run dev
 
 Visit **http://localhost:3000**
 
-### Product Repos (Coming Soon)
+### Product Directories
 
-Each product will have its own repository with CLI, docs, and deployment templates.
+Each product has its own directory with complete documentation:
+- **[chainetl/](chainetl/)** - Blockchain data pipelines (In Development)
+- **[chainops/](chainops/)** - Infrastructure-as-Code for validators
+- **[chainwatch/](chainwatch/)** - Observability for decentralized systems
+- **[securitykit/](securitykit/)** - Automated security for node operators
+- **[daoform/](daoform/)** - Governance-as-Code
 
 ---
 
-## 📚 Documentation
+## Documentation
 
 - **[Brand DNA](docs/CELARA-DNA.md)** - Complete brand, design system, and positioning
 - **[Product Architecture](docs/strategy/product-architecture.md)** - Three-pillar strategy and product suite
@@ -56,10 +61,15 @@ Each product will have its own repository with CLI, docs, and deployment templat
 
 ---
 
-## 🏗️ Repository Structure
+## Repository Structure
 
 ```
 celara-homepage/
+├── chainetl/               # Blockchain data pipelines (In Development)
+├── chainops/               # Infrastructure-as-Code for validators
+├── chainwatch/             # Observability for decentralized systems
+├── securitykit/            # Automated security for node operators
+├── daoform/                # Governance-as-Code
 ├── web/                    # Next.js marketing site
 │   ├── app/               # App Router pages
 │   ├── components/ui/     # shadcn/ui components
@@ -73,7 +83,7 @@ celara-homepage/
 
 ---
 
-## 🎨 Design System
+## Design System
 
 **Brand Colors:**
 ```css
@@ -93,7 +103,7 @@ celara-homepage/
 
 ---
 
-## 🤝 Contributing
+## Contributing
 
 We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for:
 - Code of conduct
@@ -103,7 +113,7 @@ We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for:
 
 ---
 
-## 📍 Roadmap
+## Roadmap
 
 **Q1 2025:** Foundation & OSS Launch
 - ChainOps v1.0 (Solana + Ethereum templates)
@@ -124,7 +134,7 @@ See [Phase Map](docs/strategy/phase-map.md) for full timeline.
 
 ---
 
-## 🔗 Links
+## Links
 
 - **Website:** [celara.dev](https://celara.dev) (coming soon)
 - **Docs:** [docs.celara.dev](https://docs.celara.dev) (coming soon)
@@ -133,7 +143,7 @@ See [Phase Map](docs/strategy/phase-map.md) for full timeline.
 
 ---
 
-## 📄 License
+## License
 
 Apache 2.0 - See [LICENSE](LICENSE) for details.
 
