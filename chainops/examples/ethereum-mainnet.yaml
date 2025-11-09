@@ -1,0 +1,23 @@
+# ChainOps Configuration Example
+# Ethereum Mainnet Validator
+
+name: ethereum-validator-1
+chain: ethereum
+network: mainnet
+provider: aws
+region: us-east-1
+
+compute:
+  instance_type: t3.xlarge
+  storage_size: 2000  # GB
+  spot_instances: false  # Set to true for 70% cost savings
+
+networking:
+  vpc_cidr: 10.0.0.0/16
+  public_ip: true
+  allowed_ssh_cidrs:
+    - 0.0.0.0/0  # TODO: Restrict to your IP
+
+monitoring:
+  enabled: true
+  metrics_port: 9090

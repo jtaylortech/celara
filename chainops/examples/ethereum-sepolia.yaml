@@ -1,0 +1,23 @@
+# ChainOps Configuration Example
+# Ethereum Sepolia Testnet Validator
+
+name: ethereum-sepolia-validator
+chain: ethereum
+network: sepolia
+provider: aws
+region: us-east-1
+
+compute:
+  instance_type: t3.large  # Smaller for testnet
+  storage_size: 500  # GB - testnet needs less
+  spot_instances: true  # Save costs on testnet
+
+networking:
+  vpc_cidr: 10.0.0.0/16
+  public_ip: true
+  allowed_ssh_cidrs:
+    - 0.0.0.0/0
+
+monitoring:
+  enabled: true
+  metrics_port: 9090
