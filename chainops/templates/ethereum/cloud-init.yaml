@@ -1,0 +1,84 @@
+#cloud-config
+
+package_update: true
+package_upgrade: true
+
+packages:
+  - software-properties-common
+  - curl
+  - wget
+  - git
+
+runcmd:
+  # Install Geth
+  - add-apt-repository -y ppa:ethereum/ethereum
+  - apt-get update
+  - apt-get install -y geth
+
+  # Create geth user
+  - useradd -m -s /bin/bash geth
+
+  # Create data directory
+  - mkdir -p /data/geth
+  - chown -R geth:geth /data/geth
+
+  # Create systemd service
+  - |
+    cat > /etc/systemd/system/geth.service <<'EOF'
+    [Unit]
+    Description=Geth Ethereum Client
+    After=network.target
+    
+    [Service]
+    Type=simple
+    User=geth
+    ExecStart=/usr/bin/geth \
+      --datadir /data/geth \
+      --http \
+      --http.addr 0.0.0.0 \
+      --http.api eth,net,web3 \
+      --ws \
+      --ws.addr 0.0.0.0 \
+      --ws.api eth,net,web3 \
+      --authrpc.addr 0.0.0.0 \
+      --authrpc.vhosts * \
+      --metrics \
+      --metrics.addr 0.0.0.0
+    Restart=always
+    RestartSec=10
+    LimitNOFILE=65535
+    
+    [Install]
+    WantedBy=multi-user.target
+    EOF
+
+  # Start Geth
+  - systemctl daemon-reload
+  - systemctl enable geth
+  - systemctl start geth
+
+write_files:
+  - path: /etc/motd
+    content: |
+      ╔═══════════════════════════════════════╗
+      ║   Ethereum Validator Node            ║
+      ║   Managed by ChainOps                 ║
+      ╚═══════════════════════════════════════╝
+      
+      Geth Status: systemctl status geth
+      Geth Logs:   journalctl -u geth -f
+      
+  - path: /usr/local/bin/validator-status
+    permissions: '0755'
+    content: |
+      #!/bin/bash
+      echo "=== Validator Status ==="
+      echo ""
+      echo "Geth Service:"
+      systemctl status geth --no-pager | head -5
+      echo ""
+      echo "Sync Status:"
+      geth attach /data/geth/geth.ipc --exec "eth.syncing"
+      echo ""
+      echo "Peer Count:"
+      geth attach /data/geth/geth.ipc --exec "net.peerCount"
