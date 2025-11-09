@@ -1,11 +1,18 @@
 """Terraform deployment wrapper."""
 
 import json
+import shutil
 import subprocess
 from pathlib import Path
 from typing import Any
 
 from chainops.config import ChainOpsConfig
+
+
+class DeploymentError(Exception):
+    """Raised when deployment fails."""
+
+    pass
 
 
 class Deployer:
@@ -16,6 +23,27 @@ class Deployer:
         self.config = config
         self.template_dir = self._get_template_dir()
         self.work_dir = Path.cwd() / ".chainops" / config.name
+        self._validate_prerequisites()
+
+    def _validate_prerequisites(self) -> None:
+        """Validate that required tools are installed."""
+        if not shutil.which("terraform"):
+            raise DeploymentError(
+                "Terraform not found. Install it: brew install terraform"
+            )
+
+        # Check template directory exists
+        if not self.template_dir.exists():
+            raise DeploymentError(
+                f"Template directory not found: {self.template_dir}\n"
+                f"Chain '{self.config.chain}' may not be supported yet."
+            )
+
+        # Check required template files exist
+        required_files = ["main.tf", "variables.tf", "outputs.tf"]
+        for filename in required_files:
+            if not (self.template_dir / filename).exists():
+                raise DeploymentError(f"Missing template file: {filename}")
 
     def _get_template_dir(self) -> Path:
         """Get Terraform template directory for chain."""
@@ -32,8 +60,6 @@ class Deployer:
 
         # Copy template files to work directory
         if not (self.work_dir / "main.tf").exists():
-            import shutil
-
             for file in self.template_dir.glob("*.tf"):
                 shutil.copy(file, self.work_dir)
             for file in self.template_dir.glob("*.yaml"):
@@ -55,7 +81,10 @@ class Deployer:
 
         # Run terraform
         cmd = ["terraform", *args]
-        return subprocess.run(cmd, cwd=self.work_dir, check=True)
+        try:
+            return subprocess.run(cmd, cwd=self.work_dir, check=True)
+        except subprocess.CalledProcessError as e:
+            raise DeploymentError(f"Terraform command failed: {' '.join(cmd)}") from e
 
     def plan(self) -> None:
         """Show Terraform plan."""
