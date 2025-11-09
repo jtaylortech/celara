@@ -2,7 +2,7 @@
 
 The ChainETL project is already set up and ready to use at:
 
-**Location:** `/Users/jarredet/Code/projects/celara-homepage/chainetl`
+**Location:** `celara-homepage/chainetl`
 
 ---
 
@@ -43,7 +43,7 @@ chainetl/
 
 ```bash
 # 1. Navigate to project
-cd /Users/jarredet/Code/projects/celara-homepage/chainetl
+cd chainetl
 
 # 2. Install dependencies
 uv sync --all-extras

@@ -3,7 +3,7 @@
 **Status:** In Development  
 **Owner:** Kofi  
 **Launch Target:** Q3 2026  
-**Project Location:** `/Users/jarredet/Code/projects/celara-homepage/chainetl`
+**Project Location:** `celara-homepage/chainetl`
 
 ---
 

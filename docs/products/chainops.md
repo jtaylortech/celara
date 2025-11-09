@@ -2,7 +2,7 @@
 
 **Status:** Planning  
 **Launch Target:** Q1 2026  
-**Project Location:** `/Users/jarredet/Code/projects/celara-homepage/chainops`
+**Project Location:** `celara-homepage/chainops`
 
 ---
 

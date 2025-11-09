@@ -6,7 +6,7 @@ Welcome, Kofi. This project is ready for you to start building.
 
 ```bash
 # 1. Navigate to project
-cd /Users/jarredet/Code/projects/celara-homepage/chainetl
+cd chainetl
 
 # 2. Install dependencies
 uv sync --all-extras
@@ -80,7 +80,7 @@ The foundation is complete:
 
 ```bash
 # Morning
-cd /Users/jarredet/Code/projects/celara-homepage/chainetl
+cd chainetl
 git pull
 code .
 

@@ -2,7 +2,7 @@
 
 **Status:** Planning  
 **Launch Target:** Q4 2026  
-**Project Location:** `/Users/jarredet/Code/projects/celara-homepage/daoform`
+**Project Location:** `celara-homepage/daoform`
 
 ---
 

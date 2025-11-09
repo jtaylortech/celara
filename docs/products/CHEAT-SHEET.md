@@ -234,7 +234,7 @@ def function():
 ## Daily Checklist
 
 ### Morning (5 min)
-- [ ] `cd /Users/jarredet/Code/projects/celara-homepage/chainetl`
+- [ ] `cd chainetl`
 - [ ] `git pull`
 - [ ] `code .` (open VS Code)
 - [ ] Review yesterday's notes

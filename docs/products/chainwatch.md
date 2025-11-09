@@ -2,7 +2,7 @@
 
 **Status:** Planning  
 **Launch Target:** Q2 2026  
-**Project Location:** `/Users/jarredet/Code/projects/celara-homepage/chainwatch`
+**Project Location:** `celara-homepage/chainwatch`
 
 ---
 

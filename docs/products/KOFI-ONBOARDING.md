@@ -2,7 +2,7 @@
 
 **Your Mission:** Build ChainETL — the best blockchain data pipeline tool in the world.
 
-**Project Location:** `/Users/jarredet/Code/projects/celara-homepage/chainetl`
+**Project Location:** `celara-homepage/chainetl`
 
 This guide will take you from zero to shipping production code. No prior experience required.
 
@@ -330,7 +330,7 @@ This is your daily routine when building ChainETL.
 
 ```bash
 # 1. Open Terminal
-cd /Users/jarredet/Code/projects/celara-homepage/chainetl
+cd chainetl
 
 # 2. Get latest changes
 git pull
@@ -513,13 +513,13 @@ def test_extract_invalid_block():
 
 ## Working with ChainETL
 
-The project is already set up at `/Users/jarredet/Code/projects/celara-homepage/chainetl`.
+The project is already set up at `celara-homepage/chainetl`.
 
 ### Getting Started
 
 ```bash
 # 1. Navigate to project
-cd /Users/jarredet/Code/projects/celara-homepage/chainetl
+cd chainetl
 
 # 2. Install dependencies
 uv sync --all-extras
