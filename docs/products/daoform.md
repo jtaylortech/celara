@@ -1,324 +1,319 @@
-# DAOForm
+# DAOForm — Governance-as-Code
 
-**Governance-as-Code**
-
-> Off-chain coordination with on-chain execution. Operations, governance, and treasury management for DAOs.
-
----
-
-## Overview
-
-DAOForm bridges Web2-grade operational tooling with Web3 governance. It's a lightweight coordination stack — proposals, voting, treasury, and contributor ops — all integrated with on-chain logic.
-
-**Think:** Notion + Snapshot + Gnosis Safe, unified.
+**Status:** Planning  
+**Launch Target:** Q4 2026  
+**Project Location:** `/Users/jarredet/Code/projects/celara-homepage/daoform`
 
 ---
 
-## Core Value Proposition
+## What is DAOForm?
+
+**One-liner:** Infrastructure-as-Code for DAO governance and operations.
+
+DAOForm makes it easy to launch, manage, and scale DAOs with production-grade infrastructure. Define your governance in code, deploy with one command.
 
 ### The Problem
 
-DAOs struggle not because of ideology, but because of operations:
-- Scattered tools (Discord, Snapshot, Gnosis, Notion)
-- No single source of truth
-- Manual proposal workflows
-- Difficult contributor management
-- No operational transparency
+DAO infrastructure is fragmented and complex:
+- Manual setup across multiple platforms (Snapshot, Safe, Discord)
+- No standardized governance frameworks
+- Treasury management is risky and manual
+- Proposal workflows are inconsistent
+- Difficult to migrate or upgrade governance
+
+Current solutions:
+- Manual setup (time-consuming, error-prone)
+- Platform lock-in (Snapshot, Tally, Boardroom)
+- Custom smart contracts (expensive, risky)
+- No infrastructure-as-code approach
 
 ### The Solution
 
-DAOForm turns coordination chaos into process discipline:
-- **Unified Dashboard** — Proposals, voting, treasury, contributors
-- **Governance Automation** — Off-chain draft → on-chain execution
-- **Contributor Management** — Roles, vesting, bounties
-- **Treasury Transparency** — Real-time balances and transactions
-- **Integration Ecosystem** — Discord, Slack, Gnosis Safe, Snapshot
-
----
-
-## Key Features
-
-### 1. Governance Proposals
-
-**Workflow:**
-```
-Draft → Discussion → Vote → Execution → Archive
-```
-
-**Example:**
-```yaml
-proposal:
-  title: "Increase validator commission to 8%"
-  type: parameter_change
-  discussion_period: 7d
-  voting_period: 3d
-  quorum: 10%
-  threshold: 66%
-  execution:
-    contract: governance.dao
-    method: updateCommission
-    params: [8]
-```
-
-### 2. Voting Mechanisms
-
-**Supported Types:**
-- Simple majority
-- Supermajority (66%, 75%, etc.)
-- Quadratic voting
-- Conviction voting
-- Ranked choice
-
-**Integrations:**
-- Snapshot (off-chain)
-- On-chain governance contracts
-- Token-weighted voting
-- NFT-gated voting
-
-### 3. Treasury Management
-
-**Features:**
-- Real-time balance tracking
-- Multi-sig integration (Gnosis Safe, Squads)
-- Spending proposals
-- Budget allocation
-- Transaction history
-
-**Dashboard:**
-```
-Treasury Balance: $2.5M
-├─ USDC: $1.2M
-├─ ETH: 150 ($450K)
-├─ SOL: 10,000 ($400K)
-└─ Governance Token: 500K ($450K)
-
-Monthly Burn: $50K
-Runway: 50 months
-```
-
-### 4. Contributor Management
-
-**Capabilities:**
-- Role assignments
-- Vesting schedules
-- Bounty tracking
-- Reputation scores
-- Payment automation
-
-**Example:**
-```yaml
-contributors:
-  - name: Alice
-    role: Core Developer
-    vesting:
-      total: 100000 tokens
-      cliff: 1y
-      duration: 4y
-    compensation:
-      salary: 10000 USDC/mo
-      bonus: 5000 tokens/quarter
-```
-
-### 5. DAO Constitution
-
-**Template:**
-```markdown
-# DAO Constitution
-
-## Mission
-[Define purpose and values]
-
-## Governance
-- Proposal threshold: 1% of supply
-- Quorum: 10%
-- Voting period: 3 days
-
-## Treasury
-- Multi-sig: 5/7
-- Spending limits: <$10K (no vote), >$10K (vote required)
-
-## Roles
-- Core Team: 5 members
-- Contributors: Open
-- Advisors: 3 members
-```
+DAOForm provides:
+- **Governance templates** — Battle-tested DAO structures
+- **One-command deployment** — `daoform deploy --template standard`
+- **Multi-chain support** — Ethereum, Polygon, Arbitrum, Base
+- **Treasury management** — Safe integration, spending limits
+- **Proposal automation** — GitHub-style workflows
+- **Open source** — Apache 2.0, community templates
 
 ---
 
 ## Architecture
 
+### High-Level Flow
+
 ```
-┌─────────────────────────────────────────────────────┐
-│              DAOForm Dashboard                      │
-│  (Proposals, Voting, Treasury, Contributors)        │
-└─────────────────────────────────────────────────────┘
-                        │
-        ┌───────────────┼───────────────┐
-        │               │               │
-   ┌────▼────┐    ┌─────▼─────┐   ┌────▼────┐
-   │Governance│   │ Treasury  │   │Contributor│
-   │  Engine  │   │  Manager  │   │  Manager  │
-   └────┬────┘    └─────┬─────┘   └────┬────┘
-        │               │               │
-        └───────────────┼───────────────┘
-                        │
-        ┌───────────────┼───────────────┐
-        │               │               │
-   ┌────▼────┐    ┌─────▼─────┐   ┌────▼────┐
-   │Snapshot │    │Gnosis Safe│   │ Discord │
-   │         │    │           │   │         │
-   └─────────┘    └───────────┘   └─────────┘
+┌──────────────┐      ┌──────────────┐      ┌──────────────┐      ┌──────────────┐
+│   DAOForm    │ ───> │   Template   │ ───> │  Blockchain  │ ───> │     DAO      │
+│     CLI      │      │   (Config)   │      │  (Deploy)    │      │   Running    │
+└──────────────┘      └──────────────┘      └──────────────┘      └──────────────┘
+   User Config         Governance rules      Smart contracts      Snapshot space
+   YAML/HCL           Treasury setup         Safe multisig        Discord bot
+                      Proposal workflow      Token contracts      Member roles
 ```
 
----
+### Components
 
-## Use Cases
+**1. CLI** (Python + Typer)
+- `daoform init` — Initialize DAO configuration
+- `daoform deploy` — Deploy governance infrastructure
+- `daoform propose` — Create proposals from CLI
+- `daoform status` — Check DAO health
 
-### Small DAO (<100 members)
+**2. Templates** (YAML + Jinja2)
+- Standard DAO (token voting)
+- Multisig DAO (Safe-based)
+- NFT DAO (NFT-gated)
+- Hybrid DAO (multi-token)
 
-**Scenario:** Community DAO coordinating grants
-**Solution:** Basic governance + treasury tracking
-**Cost:** Free
+**3. Smart Contracts** (Solidity)
+- Governor contracts (OpenZeppelin)
+- Token contracts (ERC20, ERC721)
+- Treasury contracts (Safe integration)
+- Timelock contracts
 
-### Protocol DAO (100-1000 members)
-
-**Scenario:** L1 protocol with active governance
-**Solution:** Full suite with contributor management
-**Cost:** $5-$15/user/mo
-
-### Large DAO (1000+ members)
-
-**Scenario:** Major DeFi protocol with complex governance
-**Solution:** Enterprise features + custom integrations
-**Cost:** Custom agreement
-
----
-
-## Pricing
-
-### Free Tier
-
-- <100 members
-- Basic proposals
-- Treasury tracking
-- Community support
-
-### Pro ($5-$15/user/mo)
-
-- Unlimited members
-- Advanced voting mechanisms
-- Contributor management
-- Priority support
-
-### Enterprise (Custom)
-
-- White-label
-- Custom integrations
-- Dedicated support
-- SLA guarantees
+**4. Integrations**
+- Snapshot (off-chain voting)
+- Safe (treasury management)
+- Discord (member management)
+- GitHub (proposal workflows)
 
 ---
 
-## Getting Started
+## MVP Scope (First Version)
 
-### Prerequisites
+### Must-Have Features
 
-- DAO governance token
-- Multi-sig wallet (optional)
-- Discord/Slack (optional)
+**DAO Types:**
+- Standard DAO (ERC20 token voting)
+- Multisig DAO (Safe-based)
 
-### Setup
+**Chains:**
+- Ethereum (mainnet, testnet)
+- Base (L2)
 
+**Features:**
+- Governance token deployment
+- Snapshot space creation
+- Safe multisig setup
+- Proposal templates
+- Member management
+
+**CLI Commands:**
 ```bash
-# Create DAO
-daoform create \
-  --name "My DAO" \
-  --token SOL:ABC123 \
-  --governance-contract XYZ789
-
-# Configure voting
-daoform configure voting \
-  --quorum 10% \
-  --threshold 66% \
-  --period 3d
-
-# Invite members
-daoform invite \
-  --role contributor \
-  --email alice@example.com
+daoform init --template standard
+daoform deploy --chain ethereum
+daoform propose "Proposal title" --description "..."
+daoform vote --proposal-id 1 --choice yes
+daoform status
 ```
 
-### Dashboard Access
+---
 
-Visit [daoform.celara.dev](https://daoform.celara.dev) to manage your DAO.
+## Tech Stack
+
+### Core
+- **Language:** Python 3.11+
+- **CLI Framework:** Typer
+- **Smart Contracts:** Solidity (OpenZeppelin)
+- **Config:** YAML + Pydantic
+- **Deployment:** Foundry/Hardhat
+
+### Integrations
+- **Snapshot:** GraphQL API
+- **Safe:** Safe SDK
+- **Discord:** Discord.py
+- **IPFS:** Web3.storage (metadata)
+
+### Development
+- **Package Manager:** uv
+- **Testing:** pytest, forge test
+- **Linting:** ruff, solhint
+- **Type Checking:** mypy
 
 ---
 
-## Templates
+## Project Structure
 
-### Grant DAO
-
-- Quarterly grant rounds
-- Application review workflow
-- Multi-sig disbursement
-- Impact reporting
-
-### Protocol DAO
-
-- Parameter change proposals
-- Upgrade governance
-- Treasury diversification
-- Contributor compensation
-
-### Investment DAO
-
-- Deal flow management
-- Investment proposals
-- Portfolio tracking
-- LP distributions
+```
+daoform/
+├── README.md
+├── pyproject.toml
+├── src/
+│   └── daoform/
+│       ├── cli.py             # CLI commands
+│       ├── config.py          # Configuration
+│       ├── deployer.py        # Deployment logic
+│       ├── integrations/
+│       │   ├── snapshot.py
+│       │   ├── safe.py
+│       │   └── discord.py
+│       └── contracts/         # Smart contract ABIs
+├── templates/
+│   ├── standard-dao/
+│   │   ├── config.yaml
+│   │   ├── governor.sol
+│   │   └── token.sol
+│   ├── multisig-dao/
+│   │   └── config.yaml
+│   └── nft-dao/
+│       └── config.yaml
+├── contracts/                 # Solidity source
+│   ├── src/
+│   │   ├── Governor.sol
+│   │   └── Token.sol
+│   └── test/
+└── tests/
+    ├── test_cli.py
+    └── test_deployer.py
+```
 
 ---
 
-## Roadmap
+## Development Phases
 
-**Q1 2026:**
-- Basic governance workflows
+### Phase 1: Foundation (Weeks 1-3)
+**Goal:** Basic DAO deployment
+
+**Tasks:**
+- [ ] Setup project structure
+- [ ] Implement CLI skeleton
+- [ ] Create standard DAO template
+- [ ] Deploy token + governor contracts
+- [ ] Write documentation
+
+**Deliverable:** `daoform deploy` creates a working DAO
+
+### Phase 2: Snapshot Integration (Weeks 4-5)
+**Goal:** Off-chain voting
+
+**Tasks:**
+- [ ] Integrate Snapshot API
+- [ ] Auto-create Snapshot space
+- [ ] Proposal creation from CLI
+- [ ] Vote tracking
+
+**Deliverable:** Full Snapshot integration
+
+### Phase 3: Treasury Management (Weeks 6-7)
+**Goal:** Safe multisig integration
+
+**Tasks:**
+- [ ] Integrate Safe SDK
+- [ ] Auto-deploy Safe multisig
+- [ ] Treasury proposal workflows
+- [ ] Spending limits
+
+**Deliverable:** Secure treasury management
+
+### Phase 4: Automation (Weeks 8-9)
+**Goal:** Proposal automation
+
+**Tasks:**
+- [ ] GitHub integration (proposals as PRs)
+- [ ] Discord bot (notifications)
+- [ ] Automated execution
+- [ ] Proposal templates
+
+**Deliverable:** Automated governance workflows
+
+### Phase 5: Multi-Chain (Weeks 10-11)
+**Goal:** Support multiple chains
+
+**Tasks:**
+- [ ] Add Base L2 support
+- [ ] Cross-chain governance
+- [ ] Chain-specific templates
+- [ ] Multi-chain treasury
+
+**Deliverable:** Deploy DAOs on multiple chains
+
+### Phase 6: Polish (Weeks 12-14)
+**Goal:** Production-ready release
+
+**Tasks:**
+- [ ] Comprehensive documentation
+- [ ] Video tutorials
+- [ ] Template marketplace
+- [ ] Launch blog post
+
+**Deliverable:** Ready for open-source launch
+
+---
+
+## Success Metrics
+
+### Technical
+- **Deployment Time:** <10 minutes (full DAO)
+- **Gas Cost:** <$100 (Ethereum mainnet)
+- **Success Rate:** >95% (deployments)
+- **Template Coverage:** 5+ DAO types
+
+### Product
+- **GitHub Stars:** 1000+ in first month
+- **Active DAOs:** 100+ deployed
+- **Chains Supported:** 2+ (Ethereum, Base)
+- **Templates:** 5+ community templates
+
+---
+
+## DAO Templates
+
+### Standard DAO
+- ERC20 governance token
+- OpenZeppelin Governor
 - Snapshot integration
-- Treasury tracking
+- Safe treasury
+- Discord bot
 
-**Q2 2026:**
-- Contributor management
-- Gnosis Safe integration
-- Discord/Slack bots
+### Multisig DAO
+- Safe multisig (3-of-5)
+- No token required
+- Snapshot for signaling
+- Treasury management
+- Member roles
 
-**Q3 2026:**
-- Advanced voting mechanisms
-- Reputation system
-- Mobile app
+### NFT DAO
+- ERC721 governance token
+- NFT-gated voting
+- Snapshot integration
+- Royalty treasury
+- Discord roles
 
-**Q4 2026:**
-- Cross-chain governance
-- AI-powered insights
-- Enterprise features
+### Hybrid DAO
+- Multi-token voting
+- Weighted governance
+- Quadratic voting
+- Complex treasury rules
+- Advanced automation
 
 ---
 
-## Community
+## Learning Resources
 
-- **GitHub:** [github.com/celara/daoform](https://github.com/celara/daoform)
-- **Discord:** [discord.gg/celara](https://discord.gg/celara)
-- **Docs:** [docs.celara.dev/daoform](https://docs.celara.dev/daoform)
+### DAO Governance
+- [OpenZeppelin Governor](https://docs.openzeppelin.com/contracts/4.x/governance)
+- [Snapshot Documentation](https://docs.snapshot.org/)
+- [Safe Documentation](https://docs.safe.global/)
+
+### Smart Contracts
+- [Solidity Documentation](https://docs.soliditylang.org/)
+- [Foundry Book](https://book.getfoundry.sh/)
+- [Smart Contract Security](https://consensys.github.io/smart-contract-best-practices/)
+
+### DAO Best Practices
+- [DAO Handbook](https://daohandbook.xyz/)
+- [Governance Design Patterns](https://www.placeholder.vc/blog/2020/9/30/governance-design-patterns)
 
 ---
 
 ## Related Products
 
-- **[ChainETL](chainetl.md)** — Analyze governance data
-- **[ChainWatch](chainwatch.md)** — Monitor DAO infrastructure
-- **[SecurityKit](securitykit.md)** — Secure treasury operations
+- **SecurityKit** — Audit DAO smart contracts
+- **ChainWatch** — Monitor DAO operations
+- **ChainETL** — Analyze DAO governance data
 
 ---
 
-**Ready to professionalize your DAO?**
-
-[Get Started →](https://celara.dev/daoform)
+**Governance infrastructure for the decentralized world.**

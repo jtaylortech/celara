@@ -1,248 +1,257 @@
-# ChainOps
+# ChainOps — Infrastructure-as-Code for Validators
 
-**Infrastructure-as-Code for Validators**
-
-> Deploy, manage, and scale blockchain nodes with cloud-native discipline.
-
----
-
-## Overview
-
-ChainOps is the foundation of Celara — a DevOps framework for blockchain infrastructure. It provides opinionated IaC templates, CDK modules, and CLIs for deploying validators, RPC nodes, and indexers on AWS, GCP, or bare-metal clusters.
-
-**Think:** Terraform for blockchain nodes.
+**Status:** Planning  
+**Launch Target:** Q1 2026  
+**Project Location:** `/Users/jarredet/Code/projects/celara-homepage/chainops`
 
 ---
 
-## Core Value Proposition
+## What is ChainOps?
+
+**One-liner:** Deploy production-grade blockchain validators with one command.
+
+ChainOps is an Infrastructure-as-Code tool that makes validator deployment as simple as running `chainops deploy ethereum`. Think Terraform meets validator operations.
 
 ### The Problem
 
-Node operations today are artisanal and error-prone:
-- Manual server provisioning
-- Scattered bash scripts
-- No version control
-- Inconsistent security baselines
-- Difficult to replicate across environments
+Running blockchain validators today requires:
+- Manual server provisioning and configuration
+- Complex networking and security setup
+- Monitoring and alerting infrastructure
+- Update and maintenance procedures
+- Different setup for every blockchain
+
+Current solutions:
+- Manual deployment (error-prone, time-consuming)
+- Custom scripts (not portable, hard to maintain)
+- Managed services (expensive, vendor lock-in)
 
 ### The Solution
 
-ChainOps turns node operations into code:
-- **Declarative Infrastructure** — Define validators like Terraform modules
-- **Multi-Chain Ready** — Supports Solana, Ethereum, Cosmos, Substrate
-- **Automated Rollouts** — Blue/green upgrades, backups, version management
-- **Auditable** — Enforces best-practice baselines (network isolation, key mgmt, observability)
-
----
-
-## Key Features
-
-### 1. One-Command Deployments
-
-```bash
-celara deploy validator \
-  --chain solana \
-  --region us-east-1 \
-  --instance-type c5.2xlarge
-```
-
-Provisions:
-- EC2 instance with optimized networking
-- EBS volumes with automated snapshots
-- Security groups with minimal attack surface
-- CloudWatch monitoring
-- Automated updates via Systems Manager
-
-### 2. Multi-Chain Support
-
-**Supported Networks:**
-- Ethereum (Geth, Nethermind, Besu)
-- Solana (Validator + RPC)
-- Cosmos SDK chains
-- Polkadot/Substrate
-- More coming via community contributions
-
-### 3. Infrastructure-as-Code
-
-```typescript
-import { SolanaValidator } from '@celara/chainops-cdk';
-
-new SolanaValidator(this, 'MainnetValidator', {
-  network: 'mainnet-beta',
-  instanceType: 'c5.2xlarge',
-  monitoring: true,
-  autoUpdates: true,
-  backupRetention: 7,
-});
-```
-
-### 4. Security Baselines
-
-Every deployment includes:
-- Network isolation (VPC + private subnets)
-- Key management (AWS KMS or HSM)
-- SSH hardening (key-only auth, fail2ban)
-- Automated security patches
-- Audit logging
-
-### 5. Automated Operations
-
-- **Blue/Green Deployments** — Zero-downtime upgrades
-- **Automated Backups** — Scheduled snapshots with retention policies
-- **Health Checks** — Automatic restart on failure
-- **Version Management** — Pin or auto-update node software
+ChainOps provides:
+- **One-command deployment** — `chainops deploy ethereum --network mainnet`
+- **Multi-chain support** — Ethereum, Solana, Cosmos, Polygon, Arbitrum, Base
+- **Infrastructure templates** — Terraform/CDK under the hood
+- **Security by default** — Firewall rules, key management, monitoring
+- **Cloud-agnostic** — AWS, GCP, Azure, bare metal
+- **Open source** — Apache 2.0, community-driven
 
 ---
 
 ## Architecture
 
+### High-Level Flow
+
 ```
-┌─────────────────────────────────────────────────────┐
-│                  ChainOps CLI                       │
-│  (celara deploy, celara update, celara monitor)     │
-└─────────────────────────────────────────────────────┘
-                        │
-        ┌───────────────┼───────────────┐
-        │               │               │
-   ┌────▼────┐    ┌─────▼─────┐   ┌────▼────┐
-   │Terraform│    │  AWS CDK  │   │Pulumi   │
-   │Templates│    │  Modules  │   │Modules  │
-   └────┬────┘    └─────┬─────┘   └────┬────┘
-        │               │               │
-        └───────────────┼───────────────┘
-                        │
-        ┌───────────────┼───────────────┐
-        │               │               │
-   ┌────▼────┐    ┌─────▼─────┐   ┌────▼────┐
-   │   AWS   │    │    GCP    │   │  Azure  │
-   │         │    │           │   │         │
-   └─────────┘    └───────────┘   └─────────┘
+┌──────────────┐      ┌──────────────┐      ┌──────────────┐      ┌──────────────┐
+│   ChainOps   │ ───> │  Terraform   │ ───> │    Cloud     │ ───> │  Validator   │
+│     CLI      │      │   Modules    │      │  Provider    │      │   Running    │
+└──────────────┘      └──────────────┘      └──────────────┘      └──────────────┘
+   User Config         Infrastructure         AWS/GCP/Azure        Ethereum Node
+   YAML/HCL           Provisioning           Compute/Network       Syncing Blocks
 ```
 
----
+### Components
 
-## Use Cases
+**1. CLI** (Python + Typer)
+- `chainops init` — Initialize new validator config
+- `chainops deploy` — Deploy validator infrastructure
+- `chainops status` — Check validator health
+- `chainops destroy` — Tear down infrastructure
 
-### Solo Validator
+**2. Templates** (Terraform/CDK)
+- Compute instances (EC2, GCE, Azure VM)
+- Networking (VPC, subnets, security groups)
+- Storage (EBS, persistent disks)
+- Monitoring (CloudWatch, Stackdriver)
 
-**Scenario:** Individual running a Solana validator
-**Solution:** One-command deployment with automated monitoring
-**Cost:** ~$200/mo (compute + storage)
+**3. Provisioners** (Ansible/Cloud-Init)
+- Install validator software
+- Configure systemd services
+- Setup monitoring agents
+- Key management
 
-### Staking Provider
-
-**Scenario:** Professional operator managing 50+ validators
-**Solution:** Multi-region deployments with centralized monitoring
-**Cost:** ChainOps Pro ($499/mo) + infrastructure costs
-
-### L1 Foundation
-
-**Scenario:** Protocol foundation supporting ecosystem validators
-**Solution:** Reference architectures + grants for ChainOps adoption
-**Cost:** Custom enterprise agreement
-
----
-
-## Pricing
-
-### OSS (Free)
-
-- CLI + Terraform/CDK templates
-- Community support (GitHub Discussions)
-- Self-hosted
-
-### ChainOps Pro ($49-$499/mo)
-
-- Managed control plane
-- Automated state management
-- CI/CD integrations
-- Priority support
-
-### Enterprise ($25K+/year)
-
-- Private deployment
-- Custom integrations
-- SLA guarantees
-- Dedicated support
+**4. Validators** (Docker/Binary)
+- Ethereum (Geth, Nethermind, Besu)
+- Solana (Solana validator)
+- Cosmos (Gaiad, Osmosis)
+- Base (Optimism client)
 
 ---
 
-## Getting Started
+## MVP Scope (First Version)
 
-### Prerequisites
+### Must-Have Features
 
-- AWS account (or GCP/Azure)
-- Node.js 20+
-- Terraform or AWS CDK
+**Chains:**
+- Ethereum (mainnet, testnet)
+- Solana (mainnet, devnet)
 
-### Installation
+**Cloud Providers:**
+- AWS (primary)
+- Bare metal (future)
 
+**Features:**
+- Single-command deployment
+- Automatic monitoring setup
+- Security group configuration
+- SSH key management
+- Cost estimation
+
+**CLI Commands:**
 ```bash
-npm install -g @celara/chainops
-celara init
-```
-
-### Quick Start
-
-```bash
-# Deploy a Solana validator
-celara deploy validator \
-  --chain solana \
-  --network mainnet-beta \
-  --region us-east-1
-
-# Monitor status
-celara status
-
-# Update node software
-celara update --version 1.18.0
-
-# Destroy infrastructure
-celara destroy
+chainops init ethereum --network mainnet
+chainops deploy
+chainops status
+chainops logs
+chainops destroy
 ```
 
 ---
 
-## Roadmap
+## Tech Stack
 
-**Q1 2025:**
-- ✅ Solana + Ethereum support
-- ✅ AWS CDK modules
-- ✅ Basic monitoring integration
+### Core
+- **Language:** Python 3.11+
+- **CLI Framework:** Typer
+- **IaC:** Terraform (HCL)
+- **Provisioning:** Cloud-Init + Ansible
+- **Config:** YAML + Pydantic
 
-**Q2 2025:**
-- Cosmos SDK support
-- GCP + Azure support
-- ChainOps Pro beta
+### Infrastructure
+- **Compute:** EC2 (t3.xlarge+)
+- **Storage:** EBS (gp3, 2TB+)
+- **Networking:** VPC, security groups
+- **Monitoring:** CloudWatch, Prometheus
 
-**Q3 2025:**
-- Polkadot/Substrate support
-- Multi-region orchestration
-- Advanced backup strategies
-
-**Q4 2025:**
-- Bare-metal support
-- Custom chain integrations
-- Enterprise features
+### Development
+- **Package Manager:** uv
+- **Testing:** pytest, terraform validate
+- **Linting:** ruff, tflint
+- **Type Checking:** mypy
 
 ---
 
-## Community
+## Project Structure
 
-- **GitHub:** [github.com/celara/chainops](https://github.com/celara/chainops)
-- **Discord:** [discord.gg/celara](https://discord.gg/celara)
-- **Docs:** [docs.celara.dev/chainops](https://docs.celara.dev/chainops)
+```
+chainops/
+├── README.md
+├── pyproject.toml
+├── src/
+│   └── chainops/
+│       ├── __init__.py
+│       ├── cli.py              # CLI commands
+│       ├── config.py           # Configuration
+│       ├── deployer.py         # Deployment logic
+│       └── providers/          # Cloud providers
+│           ├── aws.py
+│           └── gcp.py
+├── templates/
+│   ├── ethereum/
+│   │   ├── main.tf            # Terraform config
+│   │   ├── variables.tf
+│   │   └── cloud-init.yaml    # Provisioning
+│   └── solana/
+│       ├── main.tf
+│       └── cloud-init.yaml
+└── tests/
+    ├── test_cli.py
+    └── test_deployer.py
+```
+
+---
+
+## Development Phases
+
+### Phase 1: Foundation (Weeks 1-2)
+**Goal:** Basic CLI + Ethereum deployment on AWS
+
+**Tasks:**
+- [ ] Setup project structure
+- [ ] Implement CLI skeleton
+- [ ] Create Ethereum Terraform template
+- [ ] Test deployment on AWS
+- [ ] Write documentation
+
+**Deliverable:** `chainops deploy ethereum` works on AWS
+
+### Phase 2: Monitoring (Weeks 3-4)
+**Goal:** Add monitoring and alerting
+
+**Tasks:**
+- [ ] Integrate CloudWatch metrics
+- [ ] Setup Prometheus exporters
+- [ ] Add health check endpoints
+- [ ] Implement `chainops status`
+- [ ] Alert on sync issues
+
+**Deliverable:** Full observability of validators
+
+### Phase 3: Multi-Chain (Weeks 5-6)
+**Goal:** Add Solana support
+
+**Tasks:**
+- [ ] Create Solana templates
+- [ ] Abstract common patterns
+- [ ] Update CLI for chain selection
+- [ ] Add chain-specific tests
+
+**Deliverable:** Support Ethereum and Solana
+
+### Phase 4: Polish (Weeks 7-8)
+**Goal:** Documentation and packaging
+
+**Tasks:**
+- [ ] Write comprehensive docs
+- [ ] Create video tutorials
+- [ ] Package for PyPI
+- [ ] Launch blog post
+
+**Deliverable:** Ready for open-source launch
+
+---
+
+## Success Metrics
+
+### Technical
+- **Deployment Time:** <15 minutes (Ethereum)
+- **Success Rate:** >95% (first-time deployments)
+- **Cost:** <$200/month (single validator)
+- **Uptime:** >99.5%
+
+### Product
+- **GitHub Stars:** 500+ in first month
+- **Active Deployments:** 100+ validators
+- **Chains Supported:** 2+ (Ethereum, Solana)
+- **Cloud Providers:** 1+ (AWS)
+
+---
+
+## Learning Resources
+
+### Infrastructure-as-Code
+- [Terraform Documentation](https://www.terraform.io/docs)
+- [AWS CDK Guide](https://docs.aws.amazon.com/cdk/)
+- [Ansible Best Practices](https://docs.ansible.com/ansible/latest/user_guide/playbooks_best_practices.html)
+
+### Blockchain Validators
+- [Ethereum Validator Guide](https://ethereum.org/en/staking/)
+- [Solana Validator Guide](https://docs.solana.com/running-validator)
+- [Cosmos Validator Guide](https://hub.cosmos.network/main/validators/overview.html)
+
+### Cloud Infrastructure
+- [AWS Well-Architected](https://aws.amazon.com/architecture/well-architected/)
+- [GCP Best Practices](https://cloud.google.com/docs/enterprise/best-practices-for-enterprise-organizations)
 
 ---
 
 ## Related Products
 
-- **[ChainWatch](chainwatch.md)** — Monitor your ChainOps deployments
-- **[SecurityKit](securitykit.md)** — Secure your validator infrastructure
-- **[ValidatorHub](validatorhub.md)** — Track validator economics
+- **ChainWatch** — Monitor your ChainOps validators
+- **SecurityKit** — Automated security for deployed validators
+- **ChainETL** — Extract data from your validators
 
 ---
 
-**Ready to professionalize your validator operations?**
-
-[Get Started →](https://celara.dev/chainops)
+**Infrastructure-as-Code for the decentralized world.**
