@@ -25,3 +25,6 @@ def test_postgres_loader_with_sqlite() -> None:
         db_block = session.get(BlockTable, 42)
         assert db_block is not None
         assert db_block.hash == block.hash
+
+    # Dispose the engine to close any open connections and avoid ResourceWarning
+    loader.engine.dispose()
