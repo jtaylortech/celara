@@ -17,7 +17,15 @@ def sync(
     start_block: int | None = typer.Option(None, help="Starting block number"),
     destination: str = typer.Option("postgres", help="Destination (postgres, file)"),
 ) -> None:
-    """Sync blockchain data to destination."""
+    """Sync blockchain data to destination.
+
+    This command extracts a single block (for now) from the configured
+    RPC endpoint and writes it to the configured destination. The
+    optional `start_block` sets the block number to extract; if omitted
+    the extractor's latest block number will be used.
+    """
+
+    # Log the incoming request; start_block may be resolved later.
     logger.info("starting_sync", chain=chain, start_block=start_block, destination=destination)
 
     if chain != "ethereum":
@@ -31,6 +39,8 @@ def sync(
     if start_block is None:
         start_block = extractor.extract_latest_block_number()
         typer.echo(f"Starting from latest block: {start_block}")
+    else:
+        typer.echo(f"Starting from block: {start_block}")
 
     # Initialize loader
     if destination == "postgres":
