@@ -1,5 +1,6 @@
 """Configuration management."""
 
+from pydantic import ConfigDict
 from pydantic_settings import BaseSettings
 
 
@@ -16,9 +17,11 @@ class Settings(BaseSettings):
     # Logging
     log_level: str = "INFO"
 
-    class Config:
-        env_file = ".env"
-        env_file_encoding = "utf-8"
+    # Pydantic v2 configuration
+    model_config = ConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+    )
 
 
 settings = Settings()
