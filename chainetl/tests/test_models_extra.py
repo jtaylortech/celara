@@ -1,7 +1,7 @@
 """Additional model tests for transactions and logs."""
 
-from chainetl.models.transaction import Transaction
 from chainetl.models.log import Log
+from chainetl.models.transaction import Transaction
 
 
 def test_transaction_from_rpc_minimal() -> None:

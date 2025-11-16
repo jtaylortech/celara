@@ -42,6 +42,32 @@ class EthereumExtractor(BaseExtractor):
 
         return Block.from_rpc(data)
 
+    def extract_blocks(self, start_block: int, end_block: int) -> list[Block]:
+        """Extract a range of blocks.
+
+        Args:
+            start_block: Starting block number (inclusive)
+            end_block: Ending block number (inclusive)
+
+        Returns:
+            List of blocks
+
+        Raises:
+            ValueError: If start_block > end_block or if any block not found
+        """
+        if start_block > end_block:
+            raise ValueError(f"start_block ({start_block}) must be <= end_block ({end_block})")
+
+        logger.info("extracting_blocks", start_block=start_block, end_block=end_block)
+
+        blocks = []
+        for block_number in range(start_block, end_block + 1):
+            block = self.extract_block(block_number)
+            blocks.append(block)
+
+        logger.info("blocks_extracted", count=len(blocks))
+        return blocks
+
     def extract_latest_block_number(self) -> int:
         """Get the latest block number.
 

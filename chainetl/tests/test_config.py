@@ -1,7 +1,6 @@
 """Tests for configuration settings."""
 
 import importlib
-import os
 
 
 def test_settings_env_override(monkeypatch, tmp_path, capsys) -> None:
@@ -11,6 +10,7 @@ def test_settings_env_override(monkeypatch, tmp_path, capsys) -> None:
 
     # Reload the config module to re-evaluate Settings() which is created at import time
     import chainetl.config as config_module
+
     importlib.reload(config_module)
 
     assert config_module.settings.ethereum_rpc_url == "http://localhost:8545"

@@ -3,6 +3,7 @@
 from typer.testing import CliRunner
 
 from chainetl.models.block import Block
+from chainetl.models.checkpoint import Checkpoint
 
 
 def test_sync_cli_monkeypatched(monkeypatch) -> None:
@@ -28,12 +29,22 @@ def test_sync_cli_monkeypatched(monkeypatch) -> None:
     # Fake loader that records the last loaded block
     class FakeLoader:
         last_loaded = None
+        last_checkpoint = None
 
         def __init__(self, connection_string: str) -> None:
             self.connection_string = connection_string
 
         def load_block(self, block: Block) -> None:
             FakeLoader.last_loaded = block
+
+        def save_checkpoint(self, checkpoint: Checkpoint) -> None:
+            FakeLoader.last_checkpoint = checkpoint
+
+        def load_checkpoint(self, chain: str) -> Checkpoint | None:
+            return None
+
+        def detect_reorg(self, block: Block) -> bool:
+            return False
 
     # Monkeypatch the classes in the cli module
     monkeypatch.setattr("chainetl.cli.EthereumExtractor", FakeExtractor)

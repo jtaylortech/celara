@@ -1,11 +1,14 @@
 """Command-line interface."""
 
+from datetime import UTC, datetime
+
 import structlog
 import typer
 
 from chainetl.config import settings
 from chainetl.extractors.ethereum import EthereumExtractor
 from chainetl.loaders.postgres import PostgresLoader
+from chainetl.models.checkpoint import Checkpoint
 
 app = typer.Typer(help="ChainETL - Blockchain data pipelines")
 logger = structlog.get_logger()
@@ -16,17 +19,31 @@ def sync(
     chain: str = typer.Option("ethereum", help="Blockchain to sync"),
     start_block: int | None = typer.Option(None, help="Starting block number"),
     destination: str = typer.Option("postgres", help="Destination (postgres, file)"),
+    resume: bool = typer.Option(False, help="Resume from last checkpoint"),
+    count: int = typer.Option(1, help="Number of blocks to sync"),
 ) -> None:
     """Sync blockchain data to destination.
 
-    This command extracts a single block (for now) from the configured
-    RPC endpoint and writes it to the configured destination. The
-    optional `start_block` sets the block number to extract; if omitted
-    the extractor's latest block number will be used.
+    This command extracts blocks from the configured RPC endpoint and writes
+    them to the configured destination. The optional `start_block` sets the
+    block number to extract; if omitted the extractor's latest block number
+    will be used.
+
+    Use --resume to continue from the last checkpoint. If a checkpoint exists,
+    it will start from the next block after the checkpoint.
+
+    Use --count to specify how many blocks to sync (default: 1).
     """
 
     # Log the incoming request; start_block may be resolved later.
-    logger.info("starting_sync", chain=chain, start_block=start_block, destination=destination)
+    logger.info(
+        "starting_sync",
+        chain=chain,
+        start_block=start_block,
+        destination=destination,
+        resume=resume,
+        count=count,
+    )
 
     if chain != "ethereum":
         typer.echo(f"Chain '{chain}' not supported yet")
@@ -35,13 +52,6 @@ def sync(
     # Initialize extractor
     extractor = EthereumExtractor(rpc_url=settings.ethereum_rpc_url)
 
-    # Get starting block
-    if start_block is None:
-        start_block = extractor.extract_latest_block_number()
-        typer.echo(f"Starting from latest block: {start_block}")
-    else:
-        typer.echo(f"Starting from block: {start_block}")
-
     # Initialize loader
     if destination == "postgres":
         loader = PostgresLoader(settings.database_url)
@@ -49,11 +59,88 @@ def sync(
         typer.echo(f"Destination '{destination}' not supported yet")
         raise typer.Exit(1)
 
+    # Get starting block
+    if resume:
+        checkpoint = loader.load_checkpoint(chain)
+        if checkpoint:
+            start_block = checkpoint.last_synced_block + 1
+            typer.echo(
+                f"Resuming from checkpoint: block {checkpoint.last_synced_block} -> {start_block}"
+            )
+        else:
+            typer.echo("No checkpoint found, starting from latest block")
+            start_block = extractor.extract_latest_block_number()
+    elif start_block is None:
+        start_block = extractor.extract_latest_block_number()
+        typer.echo(f"Starting from latest block: {start_block}")
+    else:
+        typer.echo(f"Starting from block: {start_block}")
+
     # Extract and load
     try:
-        block = extractor.extract_block(start_block)
-        loader.load_block(block)
-        typer.echo(f"Loaded block {block.number}: {block.hash}")
+        if count == 1:
+            # Single block extraction
+            block = extractor.extract_block(start_block)
+
+            # Check for reorg
+            if loader.detect_reorg(block):
+                typer.echo(
+                    f"WARNING: Chain reorganization detected at block {block.number}",
+                    err=True,
+                )
+                typer.echo(
+                    "The new block's parent hash doesn't match the previous block.",
+                    err=True,
+                )
+                typer.echo("Continuing with sync (reorg handling is basic).", err=True)
+
+            loader.load_block(block)
+            typer.echo(f"Loaded block {block.number}: {block.hash}")
+
+            # Save checkpoint
+            checkpoint = Checkpoint(
+                chain=chain,
+                last_synced_block=block.number,
+                last_synced_hash=block.hash,
+                synced_at=datetime.now(UTC),
+                status="active",
+            )
+            loader.save_checkpoint(checkpoint)
+            typer.echo(f"Checkpoint saved at block {block.number}")
+
+        else:
+            # Batch extraction
+            end_block = start_block + count - 1
+            typer.echo(f"Syncing blocks {start_block} to {end_block} ({count} blocks)")
+            blocks = extractor.extract_blocks(start_block, end_block)
+
+            # Check for reorg in first block
+            if blocks and loader.detect_reorg(blocks[0]):
+                typer.echo(
+                    f"WARNING: Chain reorganization detected at block {blocks[0].number}",
+                    err=True,
+                )
+                typer.echo(
+                    "The new block's parent hash doesn't match the previous block.",
+                    err=True,
+                )
+                typer.echo("Continuing with sync (reorg handling is basic).", err=True)
+
+            loader.load_blocks(blocks)
+            typer.echo(f"Loaded {len(blocks)} blocks")
+
+            # Save checkpoint at the last block
+            last_block = blocks[-1]
+            checkpoint = Checkpoint(
+                chain=chain,
+                last_synced_block=last_block.number,
+                last_synced_hash=last_block.hash,
+                synced_at=datetime.now(UTC),
+                status="active",
+            )
+            loader.save_checkpoint(checkpoint)
+            typer.echo(f"Checkpoint saved at block {last_block.number}")
+
     except Exception as e:
         logger.exception("sync_failed", error=str(e))
         typer.echo(f"Sync failed: {e}")
@@ -62,12 +149,27 @@ def sync(
 
 @app.command()
 def status() -> None:
-    """Show sync status."""
+    """Show sync status and checkpoint information."""
     typer.echo("ChainETL Status:")
     typer.echo("  Chain: ethereum")
     typer.echo("  Status: Ready")
     typer.echo(f"  RPC: {settings.ethereum_rpc_url}")
     typer.echo(f"  Database: {settings.database_url}")
+
+    # Show checkpoint if available
+    try:
+        loader = PostgresLoader(settings.database_url)
+        checkpoint = loader.load_checkpoint("ethereum")
+        if checkpoint:
+            typer.echo("\nCheckpoint:")
+            typer.echo(f"  Last synced block: {checkpoint.last_synced_block}")
+            typer.echo(f"  Last synced hash: {checkpoint.last_synced_hash}")
+            typer.echo(f"  Synced at: {checkpoint.synced_at}")
+            typer.echo(f"  Status: {checkpoint.status}")
+        else:
+            typer.echo("\nCheckpoint: None")
+    except Exception as e:
+        logger.warning("failed_to_load_checkpoint", error=str(e))
 
 
 if __name__ == "__main__":

@@ -10,17 +10,22 @@ class Log(BaseModel):
     topics: list[str] = Field(default_factory=list, description="Indexed topics")
     data: str = Field("0x", description="Data payload")
     log_index: int | None = Field(None, alias="logIndex", description="Log index in block")
-    transaction_hash: str | None = Field(None, alias="transactionHash", description="Transaction hash")
+    transaction_hash: str | None = Field(
+        None, alias="transactionHash", description="Transaction hash"
+    )
     block_number: int | None = Field(None, alias="blockNumber", description="Block number")
 
     @classmethod
     def from_rpc(cls, data: dict[str, Any]) -> "Log":
         """Create Log model from RPC response."""
+        log_index_raw = data.get("logIndex")
+        block_number_raw = data.get("blockNumber")
+
         return cls(
-            address=data.get("address"),
+            address=data.get("address", ""),
             topics=data.get("topics", []),
             data=data.get("data", "0x"),
-            logIndex=int(data.get("logIndex"), 16) if data.get("logIndex") else None,
+            logIndex=int(log_index_raw, 16) if log_index_raw is not None else None,
             transactionHash=data.get("transactionHash"),
-            blockNumber=int(data.get("blockNumber"), 16) if data.get("blockNumber") else None,
+            blockNumber=int(block_number_raw, 16) if block_number_raw is not None else None,
         )

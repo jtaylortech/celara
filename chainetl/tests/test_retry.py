@@ -37,6 +37,7 @@ def test_retry_succeeds_after_failures() -> None:
 
 def test_retry_exhausted() -> None:
     """Retry should raise exception after max retries exhausted."""
+
     def always_fails() -> None:
         raise RuntimeError("Always fails")
 

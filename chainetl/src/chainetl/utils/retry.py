@@ -1,8 +1,8 @@
 """Retry logic with exponential backoff."""
 
-import asyncio
 import time
-from typing import Any, Callable, TypeVar
+from collections.abc import Callable
+from typing import TypeVar
 
 import structlog
 
@@ -34,7 +34,7 @@ def retry_with_backoff(
         Exception: If all retries fail
     """
     delay = initial_delay
-    last_exception = None
+    last_exception: Exception | None = None
 
     for attempt in range(max_retries + 1):
         try:
@@ -62,4 +62,6 @@ def retry_with_backoff(
                     error=str(e),
                 )
 
-    raise last_exception
+    if last_exception is not None:
+        raise last_exception
+    raise RuntimeError("Retry exhausted with no exception captured")

@@ -31,3 +31,26 @@ def test_extract_invalid_block(extractor: EthereumExtractor) -> None:
     """Test extracting invalid block."""
     with pytest.raises(ValueError, match="Block .* not found"):
         extractor.extract_block(999999999999)
+
+
+def test_extract_blocks_batch(extractor: EthereumExtractor) -> None:
+    """Test extracting multiple blocks in a batch."""
+    # Extract 3 blocks starting from 18000000
+    blocks = extractor.extract_blocks(18000000, 18000002)
+
+    assert len(blocks) == 3
+    assert blocks[0].number == 18000000
+    assert blocks[1].number == 18000001
+    assert blocks[2].number == 18000002
+
+    # Verify each block has valid data
+    for block in blocks:
+        assert block.hash.startswith("0x")
+        assert len(block.hash) == 66
+        assert block.timestamp > 0
+
+
+def test_extract_blocks_invalid_range(extractor: EthereumExtractor) -> None:
+    """Test extracting blocks with invalid range (start > end)."""
+    with pytest.raises(ValueError, match="start_block .* must be <= end_block"):
+        extractor.extract_blocks(100, 50)
