@@ -55,10 +55,26 @@ class BaseL2Extractor(BaseExtractor):
         if data is None:
             raise ValueError(f"Block {block_number} not found on Base L2")
 
-        # Note: Base blocks may have additional L2-specific fields like:
-        # - l1BlockNumber: The L1 block number when this L2 block was posted
-        # - l1BatchNumber: The batch number on L1
-        # For now, we use the standard Block model which works for both L1 and L2
+        # L2-Specific Fields Documentation:
+        # Base blocks may contain additional fields not present in Ethereum L1:
+        #
+        # - l1BlockNumber: The Ethereum L1 block number when this L2 block was posted
+        # - l1BatchNumber: The batch number on L1 (for rollup compression)
+        # - l1Timestamp: The L1 block timestamp
+        # - sequenceNumber: The sequence number within the batch
+        #
+        # Special Transaction Types:
+        # - Deposit transactions: L1 → L2 transfers (from Ethereum to Base)
+        # - Withdrawal transactions: L2 → L1 transfers (from Base to Ethereum)
+        #
+        # Current Implementation:
+        # We use the standard Block model which captures the core fields (number, hash,
+        # timestamp, parent_hash) that are common to both L1 and L2. The L2-specific
+        # fields are available in the RPC response but not yet persisted to the database.
+        #
+        # Future Enhancement:
+        # A future version may extend the Block model to include L2-specific fields
+        # and handle deposit/withdrawal transactions separately.
         return Block.from_rpc(data)
 
     def extract_blocks(self, start_block: int, end_block: int) -> list[Block]:

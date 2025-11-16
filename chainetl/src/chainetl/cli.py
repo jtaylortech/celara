@@ -18,7 +18,7 @@ logger = structlog.get_logger()
 
 @app.command()
 def sync(
-    chain: str = typer.Option("ethereum", help="Blockchain to sync"),
+    chain: str = typer.Option("ethereum", help="Blockchain to sync (ethereum, base)"),
     start_block: int | None = typer.Option(None, help="Starting block number"),
     destination: str = typer.Option("postgres", help="Destination (postgres, file)"),
     resume: bool = typer.Option(False, help="Resume from last checkpoint"),
@@ -35,6 +35,19 @@ def sync(
     it will start from the next block after the checkpoint.
 
     Use --count to specify how many blocks to sync (default: 1).
+
+    Examples:
+        Sync 10 Ethereum blocks starting from block 18000000:
+        $ chainetl sync --chain ethereum --start-block 18000000 --count 10
+
+        Sync 100 Base L2 blocks starting from block 10000000:
+        $ chainetl sync --chain base --start-block 10000000 --count 100
+
+        Resume Ethereum sync from last checkpoint:
+        $ chainetl sync --chain ethereum --resume --count 1000
+
+        Resume Base L2 sync from last checkpoint:
+        $ chainetl sync --chain base --resume --count 1000
     """
 
     # Log the incoming request; start_block may be resolved later.
@@ -153,8 +166,18 @@ def sync(
 
 
 @app.command()
-def status(chain: str = typer.Option("ethereum", help="Blockchain to check")) -> None:
-    """Show sync status and checkpoint information."""
+def status(
+    chain: str = typer.Option("ethereum", help="Blockchain to check (ethereum, base)")
+) -> None:
+    """Show sync status and checkpoint information.
+
+    Examples:
+        Check Ethereum sync status:
+        $ chainetl status --chain ethereum
+
+        Check Base L2 sync status:
+        $ chainetl status --chain base
+    """
     typer.echo("ChainETL Status:")
     typer.echo(f"  Chain: {chain}")
     typer.echo("  Status: Ready")
