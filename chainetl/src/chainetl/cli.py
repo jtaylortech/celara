@@ -6,6 +6,8 @@ import structlog
 import typer
 
 from chainetl.config import settings
+from chainetl.extractors.base import BaseExtractor
+from chainetl.extractors.base_l2 import BaseL2Extractor
 from chainetl.extractors.ethereum import EthereumExtractor
 from chainetl.loaders.postgres import PostgresLoader
 from chainetl.models.checkpoint import Checkpoint
@@ -45,12 +47,15 @@ def sync(
         count=count,
     )
 
-    if chain != "ethereum":
-        typer.echo(f"Chain '{chain}' not supported yet")
+    # Initialize extractor based on chain
+    extractor: BaseExtractor
+    if chain == "ethereum":
+        extractor = EthereumExtractor(rpc_url=settings.ethereum_rpc_url)
+    elif chain == "base":
+        extractor = BaseL2Extractor(rpc_url=settings.base_rpc_url)
+    else:
+        typer.echo(f"Chain '{chain}' not supported. Supported chains: ethereum, base")
         raise typer.Exit(1)
-
-    # Initialize extractor
-    extractor = EthereumExtractor(rpc_url=settings.ethereum_rpc_url)
 
     # Initialize loader
     if destination == "postgres":
@@ -148,18 +153,27 @@ def sync(
 
 
 @app.command()
-def status() -> None:
+def status(chain: str = typer.Option("ethereum", help="Blockchain to check")) -> None:
     """Show sync status and checkpoint information."""
     typer.echo("ChainETL Status:")
-    typer.echo("  Chain: ethereum")
+    typer.echo(f"  Chain: {chain}")
     typer.echo("  Status: Ready")
-    typer.echo(f"  RPC: {settings.ethereum_rpc_url}")
+
+    # Show RPC endpoint for the chain
+    if chain == "ethereum":
+        typer.echo(f"  RPC: {settings.ethereum_rpc_url}")
+    elif chain == "base":
+        typer.echo(f"  RPC: {settings.base_rpc_url}")
+    else:
+        typer.echo(f"  Chain '{chain}' not supported")
+        raise typer.Exit(1)
+
     typer.echo(f"  Database: {settings.database_url}")
 
     # Show checkpoint if available
     try:
         loader = PostgresLoader(settings.database_url)
-        checkpoint = loader.load_checkpoint("ethereum")
+        checkpoint = loader.load_checkpoint(chain)
         if checkpoint:
             typer.echo("\nCheckpoint:")
             typer.echo(f"  Last synced block: {checkpoint.last_synced_block}")
@@ -167,9 +181,9 @@ def status() -> None:
             typer.echo(f"  Synced at: {checkpoint.synced_at}")
             typer.echo(f"  Status: {checkpoint.status}")
         else:
-            typer.echo("\nCheckpoint: None")
+            typer.echo(f"\nCheckpoint: None (no {chain} sync yet)")
     except Exception as e:
-        logger.warning("failed_to_load_checkpoint", error=str(e))
+        logger.warning("failed_to_load_checkpoint", error=str(e), chain=chain)
 
 
 if __name__ == "__main__":
