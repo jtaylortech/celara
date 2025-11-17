@@ -5,6 +5,8 @@ from typing import Any
 import httpx
 import structlog
 
+from chainetl.utils.retry import retry_with_backoff
+
 logger = structlog.get_logger()
 
 
@@ -22,7 +24,7 @@ class RPCClient:
         self.client = httpx.Client(timeout=timeout)
 
     def call(self, method: str, params: list[Any]) -> Any:
-        """Make JSON-RPC call.
+        """Make JSON-RPC call with retry logic.
 
         Args:
             method: RPC method name
@@ -33,24 +35,27 @@ class RPCClient:
 
         Raises:
             ValueError: If RPC returns an error
-            httpx.HTTPError: If HTTP request fails
+            httpx.HTTPError: If HTTP request fails after retries
         """
         payload = {"jsonrpc": "2.0", "method": method, "params": params, "id": 1}
 
-        try:
-            response = self.client.post(self.url, json=payload)
-            response.raise_for_status()
-            data = response.json()
+        def _make_request() -> Any:
+            try:
+                response = self.client.post(self.url, json=payload)
+                response.raise_for_status()
+                data = response.json()
 
-            if "error" in data:
-                error_msg = data["error"].get("message", str(data["error"]))
-                raise ValueError(f"RPC error: {error_msg}")
+                if "error" in data:
+                    error_msg = data["error"].get("message", str(data["error"]))
+                    raise ValueError(f"RPC error: {error_msg}")
 
-            return data["result"]
+                return data["result"]
 
-        except httpx.HTTPError as e:
-            logger.error("rpc_call_failed", method=method, url=self.url, error=str(e))
-            raise
+            except httpx.HTTPError as e:
+                logger.error("rpc_call_failed", method=method, url=self.url, error=str(e))
+                raise
+
+        return retry_with_backoff(_make_request, max_retries=3)
 
     def close(self) -> None:
         """Close the HTTP client."""
