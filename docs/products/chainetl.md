@@ -218,17 +218,23 @@ chainetl/
 
 **Deliverable:** Runs reliably for 24+ hours without crashes
 
-### Phase 3: Multi-Chain (Weeks 5-6)
+### Phase 3: Multi-Chain (Weeks 5-6) - IN PROGRESS
 **Goal:** Add Base L2 support
 
 **Tasks:**
-- [ ] Abstract extractor interface
-- [ ] Implement Base L2 extractor
-- [ ] Handle L2-specific fields (L1 batch info)
-- [ ] Update CLI for chain selection
-- [ ] Add chain-specific tests
+- [x] Abstract extractor interface
+- [x] Implement Base L2 extractor
+- [x] Handle L2-specific fields (L1 batch info)
+- [x] Update CLI for chain selection
+- [x] Add chain-specific tests
+- [x] End-to-end testing with live Base mainnet
+- [x] Multi-chain checkpoint verification
+- [ ] Documentation updates
+- [ ] Advanced L2 features (deposit/withdrawal transactions)
 
 **Deliverable:** Support both Ethereum and Base
+
+**Status:** ~50% complete. Basic multi-chain support working, both chains syncing independently with separate checkpoints.
 
 ### Phase 4: Polish (Weeks 7-8)
 **Goal:** Documentation, examples, packaging

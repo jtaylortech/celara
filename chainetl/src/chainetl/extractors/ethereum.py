@@ -21,6 +21,15 @@ class EthereumExtractor(BaseExtractor):
         self.rpc = RPCClient(rpc_url)
         logger.info("ethereum_extractor_initialized", rpc_url=rpc_url)
 
+    @property
+    def chain_name(self) -> str:
+        """Get the name of the blockchain.
+
+        Returns:
+            "ethereum"
+        """
+        return "ethereum"
+
     def extract_block(self, block_number: int) -> Block:
         """Extract a single block.
 
