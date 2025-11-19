@@ -50,6 +50,46 @@ ETHEREUM_RPC_URL=https://eth.llamarpc.com
 BASE_RPC_URL=https://mainnet.base.org
 ```
 
+### Docker Installation (Alternative)
+
+Use Docker for easy deployment with zero configuration:
+
+```bash
+# Clone the repository
+git clone https://github.com/jtaylortech/celara-homepage.git
+cd celara-homepage/chainetl
+
+# Create .env file (optional, uses public RPCs by default)
+cat > .env <<EOF
+ETHEREUM_RPC_URL=https://eth.llamarpc.com
+BASE_RPC_URL=https://mainnet.base.org
+EOF
+
+# Start ChainETL + PostgreSQL
+docker-compose up -d
+
+# View logs
+docker-compose logs -f chainetl-ethereum
+
+# Check status
+docker-compose exec chainetl-ethereum chainetl status --chain ethereum
+
+# Stop services
+docker-compose down
+```
+
+**Multi-chain setup:**
+```bash
+# Sync both Ethereum and Base simultaneously
+docker-compose --profile multi-chain up -d
+```
+
+**Benefits of Docker:**
+- No Python installation required
+- Automatic PostgreSQL setup
+- Easy scaling and deployment
+- Isolated environment
+
 ### First Sync
 
 Sync 10 Ethereum blocks:
@@ -217,6 +257,72 @@ You can use public RPC endpoints or run your own node:
 - Multi-chain support with independent checkpoints
 - Structured logging with progress tracking
 
+### Detailed Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                         ChainETL Pipeline                       │
+└─────────────────────────────────────────────────────────────────┘
+
+┌──────────────┐         ┌──────────────────────────────────┐
+│              │         │                                  │
+│  Ethereum    │◄────────│  EthereumExtractor               │
+│  RPC Node    │         │  - extract_block()               │
+│              │         │  - extract_blocks()              │
+└──────────────┘         │  - extract_latest_block_number() │
+                         │                                  │
+                         └──────────────┬───────────────────┘
+                                        │
+┌──────────────┐         ┌──────────────▼───────────────────┐
+│              │         │                                  │
+│  Base L2     │◄────────│  BaseL2Extractor                 │
+│  RPC Node    │         │  - extract_block()               │
+│              │         │  - extract_blocks()              │
+└──────────────┘         │  - extract_latest_block_number() │
+                         │                                  │
+                         └──────────────┬───────────────────┘
+                                        │
+                         ┌──────────────▼───────────────────┐
+                         │                                  │
+                         │  Block Model (Pydantic)          │
+                         │  - Validates RPC response        │
+                         │  - Type-safe data structures     │
+                         │                                  │
+                         └──────────────┬───────────────────┘
+                                        │
+                         ┌──────────────▼───────────────────┐
+                         │                                  │
+                         │  PostgresLoader                  │
+                         │  - load_block() / load_blocks()  │
+                         │  - save_checkpoint()             │
+                         │  - detect_reorg()                │
+                         │                                  │
+                         └──────────────┬───────────────────┘
+                                        │
+                         ┌──────────────▼───────────────────┐
+                         │                                  │
+                         │  PostgreSQL Database             │
+                         │  ┌────────────────────────────┐  │
+                         │  │  blocks                    │  │
+                         │  │  - number, hash, timestamp │  │
+                         │  │  - parent_hash, gas_*      │  │
+                         │  └────────────────────────────┘  │
+                         │  ┌────────────────────────────┐  │
+                         │  │  checkpoints               │  │
+                         │  │  - chain, last_synced_*    │  │
+                         │  │  - synced_at, status       │  │
+                         │  └────────────────────────────┘  │
+                         │                                  │
+                         └──────────────────────────────────┘
+
+Key Features:
+├── Retry Logic: Exponential backoff for RPC failures
+├── Checkpoints: Resume from last synced block per chain
+├── Reorg Detection: Compare parent hashes for consistency
+├── Batch Processing: Sync multiple blocks efficiently
+└── Multi-Chain: Independent pipelines for each blockchain
+```
+
 ### Database Schema
 
 **blocks** table:
@@ -348,6 +454,76 @@ This is normal for first-time syncs. The checkpoint will be created after the fi
 2. **Run your own node**: Eliminates RPC rate limits and latency
 3. **Use connection pooling**: Configure PostgreSQL for better performance
 4. **Monitor RPC health**: Switch endpoints if one becomes slow
+
+## FAQ
+
+### General Questions
+
+**Q: What blockchains are supported?**
+A: Currently Ethereum mainnet and Base L2. More chains (Polygon, Arbitrum, Optimism) are planned for future releases.
+
+**Q: Do I need to run my own blockchain node?**
+A: No! ChainETL works with any RPC endpoint. You can use free public RPCs or paid services like Alchemy, Infura, or QuickNode.
+
+**Q: How much does it cost to run?**
+A: ChainETL is free and open-source. Costs depend on your RPC provider (free public RPCs available) and database hosting.
+
+**Q: Can I use ChainETL in production?**
+A: Yes! ChainETL includes production features like checkpoints, retry logic, reorg detection, and comprehensive logging.
+
+### Setup Questions
+
+**Q: What are the system requirements?**
+A: Python 3.11+, PostgreSQL database, and an internet connection. Minimal hardware requirements (<100MB RAM for typical usage).
+
+**Q: Can I use SQLite instead of PostgreSQL?**
+A: For development and testing, yes. For production, PostgreSQL is recommended for performance and reliability.
+
+**Q: How do I get an RPC endpoint?**
+A: Use free public RPCs (see Configuration section) or sign up for services like:
+- Alchemy (free tier available)
+- Infura (free tier available)
+- QuickNode (paid)
+- Or run your own Ethereum/Base node
+
+### Usage Questions
+
+**Q: How fast is syncing?**
+A: Depends on your RPC endpoint. Typically 50-100 blocks/second for Ethereum, 100-200 blocks/second for Base L2.
+
+**Q: Can I sync multiple chains simultaneously?**
+A: Yes! Each chain maintains independent checkpoints. Run separate sync commands or use multiple terminal windows.
+
+**Q: What happens if syncing is interrupted?**
+A: Use `--resume` to continue from the last checkpoint. ChainETL automatically saves progress after each batch.
+
+**Q: How do I handle RPC rate limits?**
+A: 1) Use `--count` to control batch size, 2) Add delays between batches, 3) Use a paid RPC service, or 4) Run your own node.
+
+### Data Questions
+
+**Q: What data is extracted?**
+A: Currently: block number, hash, parent hash, timestamp, gas used, gas limit. Future versions will include transactions, logs, and traces.
+
+**Q: Are L2-specific fields captured?**
+A: Basic block data is captured. Advanced L2 fields (L1 batch number, deposit/withdrawal transactions) are documented but not yet persisted. See [docs/L2_FIELDS.md](docs/L2_FIELDS.md).
+
+**Q: How is chain reorganization handled?**
+A: ChainETL detects reorgs by comparing parent hashes. Basic handling is implemented - warnings are logged but syncing continues.
+
+**Q: Can I export data to CSV or Parquet?**
+A: Not yet, but it's on the roadmap. Currently, data is stored in PostgreSQL and you can export using SQL queries or tools like pgAdmin.
+
+### Development Questions
+
+**Q: How do I add support for a new blockchain?**
+A: See [CONTRIBUTING.md](CONTRIBUTING.md) for a guide on implementing new extractors. Most EVM-compatible chains are straightforward to add.
+
+**Q: Can I contribute to ChainETL?**
+A: Absolutely! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines. We welcome bug reports, feature requests, and pull requests.
+
+**Q: How do I run tests?**
+A: Run `uv run pytest` for all tests, or `uv run pytest --cov=src` for coverage reports.
 
 ## Contributing
 
