@@ -1,0 +1,79 @@
+# ChainETL Docker Compose Configuration
+# Complete setup with ChainETL + PostgreSQL
+
+version: '3.8'
+
+services:
+  # PostgreSQL database for storing blockchain data
+  postgres:
+    image: postgres:16-alpine
+    container_name: chainetl-postgres
+    environment:
+      POSTGRES_USER: chainetl
+      POSTGRES_PASSWORD: chainetl_password
+      POSTGRES_DB: chainetl
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U chainetl"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - chainetl
+
+  # ChainETL service for Ethereum syncing
+  chainetl-ethereum:
+    build: .
+    container_name: chainetl-ethereum
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://chainetl:chainetl_password@postgres:5432/chainetl
+      ETHEREUM_RPC_URL: ${ETHEREUM_RPC_URL:-https://eth.llamarpc.com}
+      BASE_RPC_URL: ${BASE_RPC_URL:-https://mainnet.base.org}
+    command: >
+      sync --chain ethereum --resume --count 100
+    restart: unless-stopped
+    networks:
+      - chainetl
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ChainETL service for Base L2 syncing (optional)
+  chainetl-base:
+    build: .
+    container_name: chainetl-base
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://chainetl:chainetl_password@postgres:5432/chainetl
+      ETHEREUM_RPC_URL: ${ETHEREUM_RPC_URL:-https://eth.llamarpc.com}
+      BASE_RPC_URL: ${BASE_RPC_URL:-https://mainnet.base.org}
+    command: >
+      sync --chain base --resume --count 100
+    restart: unless-stopped
+    networks:
+      - chainetl
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    profiles:
+      - multi-chain
+
+networks:
+  chainetl:
+    driver: bridge
+
+volumes:
+  postgres_data:
+    driver: local

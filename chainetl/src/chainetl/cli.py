@@ -130,7 +130,20 @@ def sync(
             # Batch extraction
             end_block = start_block + count - 1
             typer.echo(f"Syncing blocks {start_block} to {end_block} ({count} blocks)")
-            blocks = extractor.extract_blocks(start_block, end_block)
+
+            # Show progress for larger batches
+            if count >= 10:
+                with typer.progressbar(
+                    range(start_block, end_block + 1),
+                    label="Extracting blocks",
+                    show_pos=True,
+                ) as progress:
+                    blocks = []
+                    for block_num in progress:
+                        block = extractor.extract_block(block_num)
+                        blocks.append(block)
+            else:
+                blocks = extractor.extract_blocks(start_block, end_block)
 
             # Check for reorg in first block
             if blocks and loader.detect_reorg(blocks[0]):
@@ -167,7 +180,7 @@ def sync(
 
 @app.command()
 def status(
-    chain: str = typer.Option("ethereum", help="Blockchain to check (ethereum, base)")
+    chain: str = typer.Option("ethereum", help="Blockchain to check (ethereum, base)"),
 ) -> None:
     """Show sync status and checkpoint information.
 

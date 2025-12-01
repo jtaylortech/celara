@@ -1,11 +1,43 @@
 [project]
 name = "chainetl"
 version = "0.1.0"
-description = "Blockchain data pipelines"
+description = "Production-grade blockchain data pipelines for extracting blockchain data to data warehouses"
+readme = "README.md"
+license = {text = "Apache-2.0"}
 authors = [
-    {name = "Celara", email = "jarrede20@gmail.com"}
+    {name = "Celara Team", email = "jarrede20@gmail.com"}
+]
+maintainers = [
+    {name = "Celara Team", email = "jarrede20@gmail.com"}
+]
+keywords = [
+    "blockchain",
+    "ethereum",
+    "base",
+    "etl",
+    "data-pipeline",
+    "data-warehouse",
+    "web3",
+    "crypto",
+    "analytics",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Financial and Insurance Industry",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Database",
+    "Topic :: Office/Business :: Financial",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: System :: Archiving",
+    "Typing :: Typed",
 ]
 requires-python = ">=3.11"
+
 dependencies = [
     "typer>=0.9.0",
     "httpx>=0.25.0",
@@ -16,6 +48,12 @@ dependencies = [
     "structlog>=23.2.0",
     "psycopg2-binary>=2.9.9",
 ]
+
+[project.urls]
+Homepage = "https://github.com/jtaylortech/celara-homepage/tree/main/chainetl"
+Repository = "https://github.com/jtaylortech/celara-homepage"
+Issues = "https://github.com/jtaylortech/celara-homepage/issues"
+Documentation = "https://github.com/jtaylortech/celara-homepage/blob/main/chainetl/README.md"
 
 [project.optional-dependencies]
 dev = [
