@@ -227,7 +227,7 @@ def test_sync_batch_processing(monkeypatch) -> None:
                 Block(
                     number=i,
                     hash=f"0x{i:064x}",
-                    parent_hash=f"0x{i-1:064x}",
+                    parent_hash=f"0x{i - 1:064x}",
                     timestamp=1234567890 + i,
                     transactions=[],
                 )

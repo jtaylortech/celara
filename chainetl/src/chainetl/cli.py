@@ -26,7 +26,9 @@ def _signal_handler(signum: int, frame: object) -> None:
     global _shutdown_requested
     signal_name = signal.Signals(signum).name
     logger.info("shutdown_signal_received", signal=signal_name)
-    typer.echo(f"\n⚠️  Shutdown signal received ({signal_name}). Finishing current block...", err=True)
+    typer.echo(
+        f"\n⚠️  Shutdown signal received ({signal_name}). Finishing current block...", err=True
+    )
     _shutdown_requested = True
 
 
@@ -223,7 +225,7 @@ def sync(
 
 @app.command()
 def status(
-    chain: str = typer.Option("ethereum", help="Blockchain to check (ethereum, base)")
+    chain: str = typer.Option("ethereum", help="Blockchain to check (ethereum, base)"),
 ) -> None:
     """Show sync status and checkpoint information.
 
