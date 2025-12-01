@@ -14,14 +14,14 @@ RUN apt-get update && apt-get install -y \
 
 # Install uv for fast dependency management
 RUN curl -LsSf https://astral.sh/uv/install.sh | sh
-ENV PATH="/root/.cargo/bin:$PATH"
+ENV PATH="/root/.local/bin:$PATH"
 
 # Copy project files
 COPY pyproject.toml uv.lock ./
 COPY src/ ./src/
 COPY README.md LICENSE ./
 
-# Install dependencies
+# Install dependencies and create venv
 RUN uv sync --frozen --no-dev
 
 # Create non-root user for security

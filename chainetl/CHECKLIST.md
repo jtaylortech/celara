@@ -74,7 +74,7 @@
 - [x] Update architecture documentation (updated product doc)
 
 ### Code Quality
-- [x] All tests passing (target: >80% coverage) - 31/31 tests, 81% coverage
+- [x] All tests passing (target: >80% coverage) - 36/36 tests, 91% coverage
 - [x] Ruff linting passing
 - [x] Mypy type checking passing
 - [x] Code formatted with ruff format
