@@ -18,8 +18,8 @@ class EthereumExtractor(BaseExtractor):
         Args:
             rpc_url: Ethereum RPC endpoint URL
         """
-        self.rpc = RPCClient(rpc_url)
-        logger.info("ethereum_extractor_initialized", rpc_url=rpc_url)
+        self.rpc = RPCClient(str(rpc_url))
+        logger.info("ethereum_extractor_initialized", rpc_url=str(rpc_url))
 
     @property
     def chain_name(self) -> str:
@@ -85,3 +85,8 @@ class EthereumExtractor(BaseExtractor):
         """
         result = self.rpc.call("eth_blockNumber", [])
         return int(result, 16)
+
+    def close(self) -> None:
+        """Close the RPC client connection."""
+        self.rpc.close()
+        logger.info("ethereum_extractor_closed")

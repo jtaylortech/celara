@@ -36,7 +36,7 @@ def test_sync_cli_monkeypatched(monkeypatch) -> None:
         def __init__(self, connection_string: str) -> None:
             self.connection_string = connection_string
 
-        def load_block(self, block: Block) -> None:
+        def load_block(self, block: Block, chain: str) -> None:
             FakeLoader.last_loaded = block
 
         def save_checkpoint(self, checkpoint: Checkpoint) -> None:
@@ -45,7 +45,7 @@ def test_sync_cli_monkeypatched(monkeypatch) -> None:
         def load_checkpoint(self, chain: str) -> Checkpoint | None:
             return None
 
-        def detect_reorg(self, block: Block) -> bool:
+        def detect_reorg(self, chain: str, block: Block) -> bool:
             return False
 
     # Monkeypatch the classes in the cli module
@@ -136,7 +136,7 @@ def test_sync_with_base_chain(monkeypatch) -> None:
         def __init__(self, connection_string: str) -> None:
             pass
 
-        def load_block(self, block: Block) -> None:
+        def load_block(self, block: Block, chain: str) -> None:
             FakeLoader.last_loaded = block
 
         def save_checkpoint(self, checkpoint: Checkpoint) -> None:
@@ -145,7 +145,7 @@ def test_sync_with_base_chain(monkeypatch) -> None:
         def load_checkpoint(self, chain: str) -> None:
             return None
 
-        def detect_reorg(self, block: Block) -> bool:
+        def detect_reorg(self, chain: str, block: Block) -> bool:
             return False
 
     monkeypatch.setattr("chainetl.cli.BaseL2Extractor", FakeBaseExtractor)
@@ -192,13 +192,13 @@ def test_sync_with_resume(monkeypatch) -> None:
                 status="active",
             )
 
-        def load_block(self, block: Block) -> None:
+        def load_block(self, block: Block, chain: str) -> None:
             FakeLoader.last_loaded = block
 
         def save_checkpoint(self, checkpoint: Checkpoint) -> None:
             pass
 
-        def detect_reorg(self, block: Block) -> bool:
+        def detect_reorg(self, chain: str, block: Block) -> bool:
             return False
 
     monkeypatch.setattr("chainetl.cli.EthereumExtractor", FakeExtractor)
@@ -243,13 +243,13 @@ def test_sync_batch_processing(monkeypatch) -> None:
         def load_checkpoint(self, chain: str) -> None:
             return None
 
-        def load_blocks(self, blocks: list[Block]) -> None:
+        def load_blocks(self, blocks: list[Block], chain: str) -> None:
             FakeLoader.loaded_blocks.extend(blocks)
 
         def save_checkpoint(self, checkpoint: Checkpoint) -> None:
             pass
 
-        def detect_reorg(self, block: Block) -> bool:
+        def detect_reorg(self, chain: str, block: Block) -> bool:
             return False
 
     monkeypatch.setattr("chainetl.cli.EthereumExtractor", FakeExtractor)

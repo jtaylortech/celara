@@ -23,8 +23,8 @@ class BaseL2Extractor(BaseExtractor):
         Args:
             rpc_url: Base L2 RPC endpoint URL
         """
-        self.rpc = RPCClient(rpc_url)
-        logger.info("base_l2_extractor_initialized", rpc_url=rpc_url)
+        self.rpc = RPCClient(str(rpc_url))
+        logger.info("base_l2_extractor_initialized", rpc_url=str(rpc_url))
 
     @property
     def chain_name(self) -> str:
@@ -119,3 +119,8 @@ class BaseL2Extractor(BaseExtractor):
         """
         result = self.rpc.call("eth_blockNumber", [])
         return int(result, 16)
+
+    def close(self) -> None:
+        """Close the RPC client connection."""
+        self.rpc.close()
+        logger.info("base_l2_extractor_closed")

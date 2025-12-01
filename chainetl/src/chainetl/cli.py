@@ -1,5 +1,7 @@
 """Command-line interface."""
 
+import signal
+import sys
 from datetime import UTC, datetime
 
 import structlog
@@ -14,6 +16,23 @@ from chainetl.models.checkpoint import Checkpoint
 
 app = typer.Typer(help="ChainETL - Blockchain data pipelines")
 logger = structlog.get_logger()
+
+# Global flag for graceful shutdown
+_shutdown_requested = False
+
+
+def _signal_handler(signum: int, frame: object) -> None:
+    """Handle shutdown signals gracefully."""
+    global _shutdown_requested
+    signal_name = signal.Signals(signum).name
+    logger.info("shutdown_signal_received", signal=signal_name)
+    typer.echo(f"\n⚠️  Shutdown signal received ({signal_name}). Finishing current block...", err=True)
+    _shutdown_requested = True
+
+
+# Register signal handlers for graceful shutdown
+signal.signal(signal.SIGTERM, _signal_handler)
+signal.signal(signal.SIGINT, _signal_handler)
 
 
 @app.command()
@@ -63,18 +82,31 @@ def sync(
     # Initialize extractor based on chain
     extractor: BaseExtractor
     if chain == "ethereum":
-        extractor = EthereumExtractor(rpc_url=settings.ethereum_rpc_url)
+        extractor = EthereumExtractor(rpc_url=str(settings.ethereum_rpc_url))
     elif chain == "base":
-        extractor = BaseL2Extractor(rpc_url=settings.base_rpc_url)
+        extractor = BaseL2Extractor(rpc_url=str(settings.base_rpc_url))
     else:
-        typer.echo(f"Chain '{chain}' not supported. Supported chains: ethereum, base")
+        typer.echo(f"❌ Error: Chain '{chain}' is not supported.", err=True)
+        typer.echo("", err=True)
+        typer.echo("Supported chains:", err=True)
+        typer.echo("  • ethereum - Ethereum mainnet", err=True)
+        typer.echo("  • base     - Base L2", err=True)
+        typer.echo("", err=True)
+        typer.echo("Example:", err=True)
+        typer.echo("  chainetl sync --chain ethereum --start-block 18000000", err=True)
         raise typer.Exit(1)
 
     # Initialize loader
     if destination == "postgres":
         loader = PostgresLoader(settings.database_url)
     else:
-        typer.echo(f"Destination '{destination}' not supported yet")
+        typer.echo(f"❌ Error: Destination '{destination}' is not supported.", err=True)
+        typer.echo("", err=True)
+        typer.echo("Supported destinations:", err=True)
+        typer.echo("  • postgres - PostgreSQL database", err=True)
+        typer.echo("", err=True)
+        typer.echo("Configure your database in .env:", err=True)
+        typer.echo("  DATABASE_URL=postgresql://user:password@localhost/chainetl_dev", err=True)
         raise typer.Exit(1)
 
     # Get starting block
@@ -96,85 +128,96 @@ def sync(
 
     # Extract and load
     try:
-        if count == 1:
-            # Single block extraction
-            block = extractor.extract_block(start_block)
+        try:
+            if count == 1:
+                # Single block extraction
+                block = extractor.extract_block(start_block)
 
-            # Check for reorg
-            if loader.detect_reorg(block):
-                typer.echo(
-                    f"WARNING: Chain reorganization detected at block {block.number}",
-                    err=True,
+                # Check for reorg
+                if loader.detect_reorg(chain, block):
+                    typer.echo(
+                        f"WARNING: Chain reorganization detected at block {block.number}",
+                        err=True,
+                    )
+                    typer.echo(
+                        "The new block's parent hash doesn't match the previous block.",
+                        err=True,
+                    )
+                    typer.echo("Continuing with sync (reorg handling is basic).", err=True)
+
+                loader.load_block(block, chain)
+                typer.echo(f"Loaded block {block.number}: {block.hash}")
+
+                # Save checkpoint
+                checkpoint = Checkpoint(
+                    chain=chain,
+                    last_synced_block=block.number,
+                    last_synced_hash=block.hash,
+                    synced_at=datetime.now(UTC),
+                    status="active",
                 )
-                typer.echo(
-                    "The new block's parent hash doesn't match the previous block.",
-                    err=True,
-                )
-                typer.echo("Continuing with sync (reorg handling is basic).", err=True)
+                loader.save_checkpoint(checkpoint)
+                typer.echo(f"Checkpoint saved at block {block.number}")
 
-            loader.load_block(block)
-            typer.echo(f"Loaded block {block.number}: {block.hash}")
-
-            # Save checkpoint
-            checkpoint = Checkpoint(
-                chain=chain,
-                last_synced_block=block.number,
-                last_synced_hash=block.hash,
-                synced_at=datetime.now(UTC),
-                status="active",
-            )
-            loader.save_checkpoint(checkpoint)
-            typer.echo(f"Checkpoint saved at block {block.number}")
-
-        else:
-            # Batch extraction
-            end_block = start_block + count - 1
-            typer.echo(f"Syncing blocks {start_block} to {end_block} ({count} blocks)")
-
-            # Show progress for larger batches
-            if count >= 10:
-                with typer.progressbar(
-                    range(start_block, end_block + 1),
-                    label="Extracting blocks",
-                    show_pos=True,
-                ) as progress:
-                    blocks = []
-                    for block_num in progress:
-                        block = extractor.extract_block(block_num)
-                        blocks.append(block)
             else:
-                blocks = extractor.extract_blocks(start_block, end_block)
+                # Batch extraction
+                end_block = start_block + count - 1
+                typer.echo(f"Syncing blocks {start_block} to {end_block} ({count} blocks)")
 
-            # Check for reorg in first block
-            if blocks and loader.detect_reorg(blocks[0]):
-                typer.echo(
-                    f"WARNING: Chain reorganization detected at block {blocks[0].number}",
-                    err=True,
+                # Show progress for larger batches
+                if count >= 10:
+                    with typer.progressbar(
+                        range(start_block, end_block + 1),
+                        label="Extracting blocks",
+                        show_pos=True,
+                    ) as progress:
+                        blocks = []
+                        for block_num in progress:
+                            block = extractor.extract_block(block_num)
+                            blocks.append(block)
+                else:
+                    blocks = extractor.extract_blocks(start_block, end_block)
+
+                # Check for reorg in first block
+                if blocks and loader.detect_reorg(chain, blocks[0]):
+                    typer.echo(
+                        f"WARNING: Chain reorganization detected at block {blocks[0].number}",
+                        err=True,
+                    )
+                    typer.echo(
+                        "The new block's parent hash doesn't match the previous block.",
+                        err=True,
+                    )
+                    typer.echo("Continuing with sync (reorg handling is basic).", err=True)
+
+                loader.load_blocks(blocks, chain)
+                typer.echo(f"Loaded {len(blocks)} blocks")
+
+                # Save checkpoint at the last block
+                last_block = blocks[-1]
+                checkpoint = Checkpoint(
+                    chain=chain,
+                    last_synced_block=last_block.number,
+                    last_synced_hash=last_block.hash,
+                    synced_at=datetime.now(UTC),
+                    status="active",
                 )
-                typer.echo(
-                    "The new block's parent hash doesn't match the previous block.",
-                    err=True,
-                )
-                typer.echo("Continuing with sync (reorg handling is basic).", err=True)
-
-            loader.load_blocks(blocks)
-            typer.echo(f"Loaded {len(blocks)} blocks")
-
-            # Save checkpoint at the last block
-            last_block = blocks[-1]
-            checkpoint = Checkpoint(
-                chain=chain,
-                last_synced_block=last_block.number,
-                last_synced_hash=last_block.hash,
-                synced_at=datetime.now(UTC),
-                status="active",
-            )
-            loader.save_checkpoint(checkpoint)
-            typer.echo(f"Checkpoint saved at block {last_block.number}")
+                loader.save_checkpoint(checkpoint)
+                typer.echo(f"Checkpoint saved at block {last_block.number}")
+        finally:
+            # Always cleanup RPC client
+            extractor.close()
 
     except Exception as e:
         logger.exception("sync_failed", error=str(e))
-        typer.echo(f"Sync failed: {e}")
+        typer.echo(f"\n❌ Sync failed: {e}", err=True)
+        typer.echo("", err=True)
+        typer.echo("Common issues:", err=True)
+        typer.echo("  • RPC endpoint unreachable - Check your network connection", err=True)
+        typer.echo("  • Database connection failed - Verify DATABASE_URL in .env", err=True)
+        typer.echo("  • Block not found - Try a different block number", err=True)
+        typer.echo("", err=True)
+        typer.echo("Check logs above for detailed error information.", err=True)
         raise typer.Exit(1)
 
 
@@ -197,11 +240,12 @@ def status(
 
     # Show RPC endpoint for the chain
     if chain == "ethereum":
-        typer.echo(f"  RPC: {settings.ethereum_rpc_url}")
+        typer.echo(f"  RPC: {str(settings.ethereum_rpc_url)}")
     elif chain == "base":
-        typer.echo(f"  RPC: {settings.base_rpc_url}")
+        typer.echo(f"  RPC: {str(settings.base_rpc_url)}")
     else:
-        typer.echo(f"  Chain '{chain}' not supported")
+        typer.echo(f"❌ Error: Chain '{chain}' is not supported.", err=True)
+        typer.echo("Supported chains: ethereum, base", err=True)
         raise typer.Exit(1)
 
     typer.echo(f"  Database: {settings.database_url}")
