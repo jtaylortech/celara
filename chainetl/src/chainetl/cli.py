@@ -180,7 +180,7 @@ def sync(
 
 @app.command()
 def status(
-    chain: str = typer.Option("ethereum", help="Blockchain to check (ethereum, base)")
+    chain: str = typer.Option("ethereum", help="Blockchain to check (ethereum, base)"),
 ) -> None:
     """Show sync status and checkpoint information.
 
