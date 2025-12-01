@@ -395,7 +395,7 @@ uv run pytest -v
 uv run pytest --cov=src --cov-report=term-missing
 ```
 
-Current test coverage: **81%** (31 tests)
+Current test coverage: **89%** (36 tests)
 
 ## Examples
 
