@@ -45,8 +45,10 @@ def test_terraform_template_valid():
         pytest.skip("Terraform not installed")
 
     with TemporaryDirectory() as tmpdir:
-        # Copy templates
+        # Copy templates (both .tf and .yaml files)
         for file in template_dir.glob("*.tf"):
+            shutil.copy(file, tmpdir)
+        for file in template_dir.glob("*.yaml"):
             shutil.copy(file, tmpdir)
 
         # Initialize
@@ -57,12 +59,72 @@ def test_terraform_template_valid():
             capture_output=True,
         )
 
-        # Validate
+        # Validate - may fail due to AWS provider needing credentials
         result = subprocess.run(
-            ["terraform", "validate"], cwd=tmpdir, check=True, capture_output=True, text=True
+            ["terraform", "validate"], cwd=tmpdir, capture_output=True, text=True
         )
 
-        assert "Success" in result.stdout or result.returncode == 0
+        # Success or AWS credential error (not syntax error)
+        aws_auth_errors = ["InvalidClientTokenId", "validating provider credentials"]
+        assert result.returncode == 0 or any(err in result.stderr for err in aws_auth_errors)
+
+
+def test_solana_template_files_exist():
+    """Verify Solana template files exist."""
+    template_dir = Path(__file__).parent.parent / "templates" / "solana"
+
+    required_files = ["main.tf", "variables.tf", "outputs.tf", "cloud-init.yaml"]
+
+    for filename in required_files:
+        filepath = template_dir / filename
+        assert filepath.exists(), f"Missing Solana template file: {filename}"
+
+
+def test_state_management():
+    """Test state management for tracking deployments."""
+    from chainops.state import Deployment, State
+
+    state = State()
+
+    # Add deployment
+    deployment = Deployment(
+        name="test-validator",
+        chain="ethereum",
+        network="sepolia",
+        provider="aws",
+        region="us-east-1",
+        status="deploying",
+    )
+    state.deployments[deployment.name] = deployment
+
+    # Verify
+    assert state.get("test-validator") is not None
+    assert state.get("test-validator").status == "deploying"
+
+    # Update status
+    state.deployments["test-validator"].status = "running"
+    assert state.get("test-validator").status == "running"
+
+    # List all
+    assert len(state.list_all()) == 1
+
+
+def test_monitoring_config():
+    """Test monitoring configuration generation."""
+    from chainops.monitoring import get_cloudwatch_agent_config, get_prometheus_config
+
+    # Ethereum
+    prom = get_prometheus_config("ethereum", "eth-validator")
+    assert "geth" in prom
+    assert "eth-validator" in prom
+
+    # Solana
+    prom = get_prometheus_config("solana", "sol-validator")
+    assert "solana" in prom
+
+    # CloudWatch
+    cw = get_cloudwatch_agent_config("ethereum", "eth-validator")
+    assert cw["metrics"]["namespace"] == "ChainOps/eth-validator"
 
 
 def test_deployer_creates_work_dir():
@@ -201,8 +263,10 @@ def test_terraform_plan_works():
         )
 
         # Should either succeed or fail with AWS auth error (not syntax error)
-        assert (
-            result.returncode == 0
-            or "No valid credential sources found" in result.stderr
-            or "Error: configuring Terraform AWS Provider" in result.stderr
-        )
+        aws_auth_errors = [
+            "No valid credential sources found",
+            "Error: configuring Terraform AWS Provider",
+            "InvalidClientTokenId",
+            "validating provider credentials",
+        ]
+        assert result.returncode == 0 or any(err in result.stderr for err in aws_auth_errors)
