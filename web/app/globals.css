@@ -1,19 +1,23 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
 :root {
-  --bg: #09090B;
-  --surface: #18181B;
-  --text: #FAFAFA;
-  --muted: #71717A;
-  --border: #27272A;
-  --accent: #3B82F6;
+  --bg: #000000;
+  --surface: #0a0a0a;
+  --border: #1a1a1a;
+  --text: #fafafa;
+  --muted: #666666;
+  --accent: #5C6FFF;
 }
 
 body {
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
   background: var(--bg);
   color: var(--text);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--text);
 }
