@@ -63,6 +63,10 @@ export default function Home() {
           <Link href="https://jtaylor.app" className="hover:text-[var(--text)] transition-colors">
             Jarred
           </Link>
+          {" & "}
+          <Link href="https://github.com/kofikwarba" className="hover:text-[var(--text)] transition-colors">
+            Kofi
+          </Link>
         </p>
       </div>
     </main>
