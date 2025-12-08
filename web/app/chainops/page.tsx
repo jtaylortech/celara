@@ -12,15 +12,15 @@ export default function ChainOps() {
         </Link>
 
         <div className="mt-8 space-y-4">
-          <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
+          <h1 className="text-4xl md:text-5xl font-bold tracking-tight">
             ChainOps
           </h1>
-          <p className="text-[var(--muted)]">
+          <p className="text-lg text-[var(--muted)]">
             Infrastructure-as-Code for validators
           </p>
         </div>
 
-        <div className="mt-12 space-y-6 text-[var(--muted)] leading-relaxed">
+        <div className="mt-12 space-y-6 text-lg text-[var(--muted)] leading-relaxed">
           <p>
             Deploy blockchain validators with a single command. Terraform and cloud-init 
             templates for Ethereum, Solana, and Cosmos networks.

@@ -12,15 +12,15 @@ export default function ChainETL() {
         </Link>
 
         <div className="mt-8 space-y-4">
-          <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
+          <h1 className="text-4xl md:text-5xl font-bold tracking-tight">
             ChainETL
           </h1>
-          <p className="text-[var(--muted)]">
+          <p className="text-lg text-[var(--muted)]">
             Blockchain data pipelines
           </p>
         </div>
 
-        <div className="mt-12 space-y-6 text-[var(--muted)] leading-relaxed">
+        <div className="mt-12 space-y-6 text-lg text-[var(--muted)] leading-relaxed">
           <p>
             Extract blockchain data and load it into your data warehouse. 
             Real-time and batch processing for Ethereum, Base, and more.

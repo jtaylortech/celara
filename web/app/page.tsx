@@ -13,11 +13,11 @@ export default function Home() {
     <main className="min-h-screen px-6 py-16 md:py-24">
       <div className="max-w-2xl mx-auto">
         {/* Hero */}
-        <div className="space-y-4">
-          <h1 className="text-4xl md:text-5xl font-bold tracking-tight">
+        <div className="space-y-5">
+          <h1 className="text-5xl md:text-6xl font-bold tracking-tight">
             Celara
           </h1>
-          <p className="text-lg md:text-xl text-[var(--muted)] leading-relaxed">
+          <p className="text-xl md:text-2xl text-[var(--muted)] leading-relaxed">
             Open-source infrastructure for blockchain validators, node operators, and DAOs. 
             DevOps tooling for decentralized systems.
           </p>
@@ -29,10 +29,10 @@ export default function Home() {
             const content = (
               <>
                 <div className="flex items-center gap-4">
-                  <span className="font-medium">{product.name}</span>
-                  <span className="text-sm text-[var(--muted)]">{product.desc}</span>
+                  <span className="text-lg font-medium">{product.name}</span>
+                  <span className="text-base text-[var(--muted)]">{product.desc}</span>
                 </div>
-                <span className="text-xs text-[var(--muted)] opacity-60">
+                <span className="text-sm text-[var(--muted)] opacity-60">
                   {product.status === "building" ? "In development" : "Coming soon"}
                 </span>
               </>
