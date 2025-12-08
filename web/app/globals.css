@@ -3,60 +3,17 @@
 @tailwind utilities;
 
 :root {
-  /* Light theme */
-  --bg: #F6F7F9;
-  --surface: #FFFFFF;
-  --text: #0E0E11;
-  --muted: #5A5A66;
-  --border: #E1E1E6;
-  --accent-1: #FFD53D;
-  --accent-2: #E6B30E;
-  --ring: rgba(255, 213, 61, 0.35);
-
-  --radius-sm: 8px;
-  --radius-md: 16px;
-  --radius-lg: 24px;
-
-  --shadow-sm: 0 2px 8px rgba(0,0,0,0.08);
-  --shadow-md: 0 4px 16px rgba(0,0,0,0.1);
-  --shadow-lg: 0 8px 24px rgba(0,0,0,0.12);
-}
-
-/* Dark theme (default) */
-:root.dark,
-.dark {
-  --bg: #0E0E11;
-  --surface: #16161A;
-  --text: #F6F7F9;
-  --muted: #A3A3AD;
-  --border: #1E1E22;
-  --accent-1: #FFE66D;
-  --accent-2: #FDB927;
-  --ring: rgba(255, 230, 109, 0.30);
-
-  --shadow-sm: 0 2px 8px rgba(0,0,0,0.30);
-  --shadow-md: 0 4px 16px rgba(0,0,0,0.40);
-  --shadow-lg: 0 8px 24px rgba(0,0,0,0.45);
-}
-
-html {
-  color-scheme: dark;
-}
-
-html.light {
-  color-scheme: light;
+  --bg: #09090B;
+  --surface: #18181B;
+  --text: #FAFAFA;
+  --muted: #71717A;
+  --border: #27272A;
+  --accent: #3B82F6;
 }
 
 body {
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   background: var(--bg);
   color: var(--text);
-}
-
-/* Container utility */
-.container-celara {
-  max-width: 1280px;
-  padding-left: 2rem;
-  padding-right: 2rem;
-  margin: 0 auto;
+  -webkit-font-smoothing: antialiased;
 }
