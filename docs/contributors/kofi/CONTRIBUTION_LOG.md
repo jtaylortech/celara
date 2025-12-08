@@ -31,11 +31,40 @@ This file records the manual actions performed by Kofi during the Week 1 onboard
   - All 12 tests passing with 87% coverage (above Phase 1 target of >80%).
 - Created PR #1 with @jtaylortech assigned as reviewer.
 
+## Phase 2: Core Pipeline (Nov 15-22)
+
+- Implemented batch block extraction with configurable batch sizes
+- Added checkpoint system for resumable syncs
+- Implemented reorg detection (parent hash validation)
+- Added retry logic with exponential backoff for RPC calls
+- Expanded test coverage to 25 tests
+
+## Phase 3: Multi-Chain Support (Nov 23-28)
+
+- Designed and implemented abstract `BaseExtractor` class
+- Created `BaseL2Extractor` for Base L2 chain support
+- Updated CLI with `--chain` option supporting ethereum/base
+- Added chain-specific checkpoint isolation
+- Documented L2-specific fields (L1 batch info, deposit/withdrawal patterns)
+- Tests expanded to 31 tests, 81% coverage
+
+## Phase 4: Polish & Launch Prep (Nov 28-30)
+
+- Comprehensive README with quick start, FAQ, architecture diagram
+- CONTRIBUTING.md with development setup and code standards
+- Example configurations for Ethereum and Base
+- CLI polish: progress bars, improved help messages
+- Docker support: Dockerfile + docker-compose.yml
+- PyPI packaging ready (pyproject.toml configured)
+- Security scan with Bandit (no vulnerabilities)
+- Final test suite: 36 tests, 89% coverage
+
 ## Summary
 
-- **Phase 1 Status:** Complete ✅
-- **Tests:** 12 passing (87% coverage)
-- **CLI Deliverable:** `chainetl sync --chain ethereum` works locally ✅
-- **PR:** #1 created and awaiting review
+- **v0.1.0 Status:** Complete ✅ Ready for Release
+- **Tests:** 36 passing (89% coverage)
+- **Chains Supported:** Ethereum, Base L2
+- **Features:** Batch sync, checkpoints, reorg detection, Docker deployment
+- **Quality:** Ruff linting, Mypy strict, Bandit security scan all passing
 
-Timestamps: 2025-11-12 to 2025-11-14
+Timestamps: 2025-11-12 to 2025-11-30

@@ -1,10 +1,21 @@
 # Celara Project Status
 
-**Last Updated:** November 4, 2025
+**Last Updated:** December 7, 2025
 
 ## Current State
 
 ### ✅ Completed
+
+**ChainETL v0.1.0:** ✅ Ready for Release
+- Multi-chain support (Ethereum + Base L2)
+- Resumable syncs with checkpoints
+- Batch processing with progress bars
+- Reorg detection
+- PostgreSQL loader
+- Docker deployment (Dockerfile + docker-compose)
+- 36 tests, 89% coverage
+- Ruff, Mypy strict, Bandit security scan all passing
+- Comprehensive documentation (README, CONTRIBUTING, examples)
 
 **Marketing Site:**
 - Next.js 14 homepage with hero, product grid, and footer
@@ -32,6 +43,11 @@
 ---
 
 ## 🚧 In Progress
+
+**ChainETL v0.2 (Next):**
+- Transaction & log extraction
+- BigQuery/S3 loaders
+- Additional chains (Polygon, Arbitrum, Optimism)
 
 **Marketing Site:**
 - Product detail pages (`/products/[slug]`)
