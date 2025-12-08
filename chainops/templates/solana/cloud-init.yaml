@@ -1,0 +1,124 @@
+#cloud-config
+
+package_update: true
+package_upgrade: true
+
+packages:
+  - software-properties-common
+  - curl
+  - wget
+  - git
+  - build-essential
+  - pkg-config
+  - libssl-dev
+  - libudev-dev
+
+runcmd:
+  # Mount ledger storage
+  - mkfs.ext4 /dev/nvme1n1 || mkfs.ext4 /dev/xvdf
+  - mkdir -p /data/solana/ledger
+  - mount /dev/nvme1n1 /data/solana/ledger || mount /dev/xvdf /data/solana/ledger
+  - echo '/dev/nvme1n1 /data/solana/ledger ext4 defaults,nofail 0 2' >> /etc/fstab
+
+  # Mount accounts storage
+  - mkfs.ext4 /dev/nvme2n1 || mkfs.ext4 /dev/xvdg
+  - mkdir -p /data/solana/accounts
+  - mount /dev/nvme2n1 /data/solana/accounts || mount /dev/xvdg /data/solana/accounts
+  - echo '/dev/nvme2n1 /data/solana/accounts ext4 defaults,nofail 0 2' >> /etc/fstab
+
+  # Create solana user
+  - useradd -m -s /bin/bash solana
+  - chown -R solana:solana /data/solana
+
+  # Install Solana CLI
+  - su - solana -c 'sh -c "$(curl -sSfL https://release.solana.com/stable/install)"'
+  - echo 'export PATH="/home/solana/.local/share/solana/install/active_release/bin:$PATH"' >> /home/solana/.bashrc
+
+  # System tuning for Solana
+  - |
+    cat >> /etc/sysctl.conf <<'EOF'
+    net.core.rmem_default=134217728
+    net.core.rmem_max=134217728
+    net.core.wmem_default=134217728
+    net.core.wmem_max=134217728
+    vm.max_map_count=1000000
+    fs.nr_open=1000000
+    EOF
+  - sysctl -p
+
+  # Increase file limits
+  - |
+    cat >> /etc/security/limits.conf <<'EOF'
+    solana soft nofile 1000000
+    solana hard nofile 1000000
+    EOF
+
+  # Create systemd service
+  - |
+    cat > /etc/systemd/system/solana-validator.service <<'EOF'
+    [Unit]
+    Description=Solana Validator
+    After=network.target
+    
+    [Service]
+    Type=simple
+    User=solana
+    Environment="PATH=/home/solana/.local/share/solana/install/active_release/bin:/usr/bin"
+    ExecStart=/home/solana/.local/share/solana/install/active_release/bin/solana-validator \
+      --identity /data/solana/validator-keypair.json \
+      --vote-account /data/solana/vote-account-keypair.json \
+      --ledger /data/solana/ledger \
+      --accounts /data/solana/accounts \
+      --rpc-port 8899 \
+      --dynamic-port-range 8000-8020 \
+      --entrypoint entrypoint.devnet.solana.com:8001 \
+      --expected-genesis-hash 4uhcVJyU9pJkvQyS88uRDiswHXSCkY3zQawwpjk2NsNY \
+      --wal-recovery-mode skip_any_corrupted_record \
+      --limit-ledger-size \
+      --enable-rpc-transaction-history \
+      --full-rpc-api \
+      --no-voting
+    Restart=always
+    RestartSec=10
+    LimitNOFILE=1000000
+    
+    [Install]
+    WantedBy=multi-user.target
+    EOF
+
+  # Generate keypairs (for RPC node, not voting)
+  - su - solana -c '/home/solana/.local/share/solana/install/active_release/bin/solana-keygen new --no-bip39-passphrase -o /data/solana/validator-keypair.json'
+  - su - solana -c '/home/solana/.local/share/solana/install/active_release/bin/solana-keygen new --no-bip39-passphrase -o /data/solana/vote-account-keypair.json'
+
+  # Start validator
+  - systemctl daemon-reload
+  - systemctl enable solana-validator
+  - systemctl start solana-validator
+
+write_files:
+  - path: /etc/motd
+    content: |
+      ╔═══════════════════════════════════════╗
+      ║   Solana Validator Node               ║
+      ║   Managed by ChainOps                 ║
+      ╚═══════════════════════════════════════╝
+      
+      Validator Status: systemctl status solana-validator
+      Validator Logs:   journalctl -u solana-validator -f
+      Catchup Status:   solana catchup --our-localhost
+      
+  - path: /usr/local/bin/validator-status
+    permissions: '0755'
+    content: |
+      #!/bin/bash
+      export PATH="/home/solana/.local/share/solana/install/active_release/bin:$PATH"
+      echo "=== Solana Validator Status ==="
+      echo ""
+      echo "Service Status:"
+      systemctl status solana-validator --no-pager | head -5
+      echo ""
+      echo "Catchup Status:"
+      solana catchup --our-localhost 2>/dev/null || echo "Validator still starting..."
+      echo ""
+      echo "Slot:"
+      solana slot 2>/dev/null || echo "RPC not ready"

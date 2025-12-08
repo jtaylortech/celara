@@ -1,0 +1,20 @@
+name: solana-validator
+chain: solana
+network: devnet
+provider: aws
+region: us-east-1
+
+compute:
+  instance_type: r6i.2xlarge
+  storage_size: 2000
+  spot_instances: false
+
+networking:
+  vpc_cidr: 10.0.0.0/16
+  public_ip: true
+  allowed_ssh_cidrs:
+    - 0.0.0.0/0
+
+monitoring:
+  enabled: true
+  metrics_port: 9090
