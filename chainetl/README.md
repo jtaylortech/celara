@@ -175,6 +175,28 @@ uv run chainetl sync --chain ethereum --resume --count 100
 uv run chainetl sync --chain base --resume --count 500
 ```
 
+## CLI Reference
+
+### `chainetl sync`
+
+Sync blockchain data to destination.
+
+| Option | Default | Description |
+|--------|---------|-------------|
+| `--chain` | `ethereum` | Blockchain to sync (`ethereum`, `base`) |
+| `--start-block` | latest | Starting block number |
+| `--count` | `1` | Number of blocks to sync |
+| `--resume` | `false` | Resume from last checkpoint |
+| `--destination` | `postgres` | Output destination |
+
+### `chainetl status`
+
+Show sync status and checkpoint information.
+
+| Option | Default | Description |
+|--------|---------|-------------|
+| `--chain` | `ethereum` | Blockchain to check (`ethereum`, `base`) |
+
 ## Configuration
 
 ### Environment Variables
@@ -225,39 +247,6 @@ You can use public RPC endpoints or run your own node:
 - `https://base.publicnode.com` (PublicNode)
 
 ## Architecture
-
-### Components
-
-```
-┌─────────────┐      ┌─────────────┐      ┌─────────────┐
-│  Blockchain │ ───> │   ChainETL  │ ───> │  PostgreSQL │
-│   (Source)  │      │  (Extract)  │      │ (Warehouse) │
-└─────────────┘      └─────────────┘      └─────────────┘
-```
-
-**Extractors**
-- Connect to blockchain RPC endpoints
-- Extract blocks and transactions
-- Handle retries and errors
-- Support batch processing
-
-**Loaders**
-- Write data to PostgreSQL
-- Manage checkpoints for resumability
-- Detect and handle chain reorgs
-- Ensure data consistency
-
-**Models**
-- Pydantic models for type safety
-- Validate data from RPC responses
-- Provide clean Python interfaces
-
-**CLI**
-- Simple commands for syncing and monitoring
-- Multi-chain support with independent checkpoints
-- Structured logging with progress tracking
-
-### Detailed Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
@@ -580,4 +569,4 @@ Apache 2.0 - See [LICENSE](LICENSE) for details.
 
 ---
 
-**Built by the Celara team** | [Documentation](../docs/products/chainetl.md) | [Contributing](CONTRIBUTING.md) | [License](LICENSE)
+**Built by [Jarred](https://github.com/jtaylortech) & [Kofi](https://github.com/kofikwarba)** | [Docs](../docs/products/chainetl.md) | [Contributing](CONTRIBUTING.md)
