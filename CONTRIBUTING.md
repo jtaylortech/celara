@@ -26,7 +26,7 @@ Celara exists to professionalize blockchain infrastructure — bringing DevOps d
 
 ```bash
 # Clone the repo
-git clone https://github.com/celara/celara-homepage.git
+git clone https://github.com/jtaylortech/celara-homepage.git
 cd celara-homepage
 
 # Install dependencies
@@ -57,7 +57,7 @@ web/
 
 ### 1. Find or Create an Issue
 
-- Check [existing issues](https://github.com/celara/celara-homepage/issues)
+- Check [existing issues](https://github.com/jtaylortech/celara-homepage/issues)
 - For new features, open an issue first to discuss
 - For bugs, include reproduction steps
 
@@ -145,11 +145,12 @@ Open a PR with:
 ### Brand Colors
 
 ```css
---orbit: #4C6FFF      /* Primary actions, links */
---plasma: #6B3DF4     /* Secondary elements */
---nebula: #F05AFF     /* Accents, highlights */
---teal: #2DD4BF       /* Success states */
---deepspace: #0A0E29  /* Dark backgrounds */
+--bg: #000000         /* Pure black background */
+--surface: #0a0a0a    /* Cards, subtle lift */
+--border: #1a1a1a     /* Subtle borders */
+--text: #fafafa       /* Primary text */
+--muted: #666666      /* Secondary text */
+--accent: #5C6FFF     /* Links, hover states */
 ```
 
 ### Typography
