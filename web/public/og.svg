@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630">
+  <rect width="1200" height="630" fill="#000000"/>
+  <text x="100" y="280" font-family="Inter, system-ui, sans-serif" font-size="96" font-weight="700" fill="#fafafa">Celara</text>
+  <text x="100" y="360" font-family="Inter, system-ui, sans-serif" font-size="32" fill="#666666">DevOps tooling for decentralized systems</text>
+  <text x="100" y="520" font-family="Inter, system-ui, sans-serif" font-size="24" fill="#5C6FFF">celara.dev</text>
+</svg>

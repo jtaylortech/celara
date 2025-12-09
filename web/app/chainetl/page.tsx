@@ -1,4 +1,11 @@
+import type { Metadata } from "next";
 import Link from "next/link";
+
+export const metadata: Metadata = {
+  title: "ChainETL — Blockchain Data Pipelines | Celara",
+  description:
+    "Extract blockchain data and load it into your data warehouse. Real-time and batch processing for Ethereum, Base, and more.",
+};
 
 export default function ChainETL() {
   return (

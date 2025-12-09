@@ -1,4 +1,11 @@
+import type { Metadata } from "next";
 import Link from "next/link";
+
+export const metadata: Metadata = {
+  title: "ChainOps — Infrastructure-as-Code for Validators | Celara",
+  description:
+    "Deploy blockchain validators with a single command. Terraform and cloud-init templates for Ethereum, Solana, and Cosmos networks.",
+};
 
 export default function ChainOps() {
   return (
