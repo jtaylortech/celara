@@ -3,18 +3,13 @@ name = "chainwatch"
 version = "0.1.0"
 description = "Observability for decentralized systems"
 authors = [
-    {name = "Celara", email = "jarrede20@gmail.com"}
+    {name = "Jarred Taylor", email = "jarrede20@gmail.com"}
 ]
 requires-python = ">=3.11"
 dependencies = [
-    "fastapi>=0.104.0",
-    "uvicorn>=0.24.0",
-    "sqlalchemy>=2.0.0",
-    "psycopg2-binary>=2.9.9",
-    "redis>=5.0.0",
-    "celery>=5.3.0",
-    "prometheus-client>=0.19.0",
+    "typer>=0.9.0",
     "httpx>=0.25.0",
+    "prometheus-client>=0.19.0",
 ]
 
 [project.optional-dependencies]
@@ -22,7 +17,11 @@ dev = [
     "pytest>=7.4.0",
     "mypy>=1.7.0",
     "ruff>=0.1.0",
+    "pytest-cov>=4.1.0",
 ]
+
+[project.scripts]
+chainwatch = "chainwatch.cli:app"
 
 [build-system]
 requires = ["hatchling"]
