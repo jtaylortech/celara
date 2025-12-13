@@ -7,6 +7,9 @@ from chainetl.models.transaction import Transaction
 def test_transaction_from_rpc_minimal() -> None:
     rpc = {
         "hash": "0x" + "f" * 64,
+        "blockNumber": "0x10",  # 16
+        "blockHash": "0x" + "b" * 64,
+        "transactionIndex": "0x0",
         "from": "0x" + "1" * 40,
         "to": "0x" + "2" * 40,
         "value": "0x10",
@@ -18,6 +21,7 @@ def test_transaction_from_rpc_minimal() -> None:
 
     tx = Transaction.from_rpc(rpc)
     assert tx.hash.startswith("0x")
+    assert tx.block_number == 16
     assert tx.value == 16
     assert tx.gas == int("0x5208", 16)
 
