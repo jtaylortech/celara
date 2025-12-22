@@ -107,7 +107,8 @@ def test_token_transfer_from_erc20_log() -> None:
     log_data = {
         "address": "0x" + "a" * 40,  # Token contract
         "topics": [
-            "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",  # Transfer signature
+            # Transfer signature
+            "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
             "0x" + "0" * 24 + "b" * 40,  # from (padded)
             "0x" + "0" * 24 + "c" * 40,  # to (padded)
         ],

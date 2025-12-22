@@ -6,7 +6,6 @@ This module provides utilities for parsing common Ethereum token standards:
 - ERC-1155: Multi-token standard
 """
 
-from typing import Any
 
 import structlog
 
@@ -18,7 +17,8 @@ logger = structlog.get_logger()
 # ERC-20 Transfer event signature: Transfer(address indexed from, address indexed to, uint256 value)
 ERC20_TRANSFER_SIGNATURE = "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef"
 
-# ERC-721 Transfer event signature: Transfer(address indexed from, address indexed to, uint256 indexed tokenId)
+# ERC-721 Transfer event signature:
+# Transfer(address indexed from, address indexed to, uint256 indexed tokenId)
 ERC721_TRANSFER_SIGNATURE = "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef"
 
 # Note: ERC-20 and ERC-721 share the same Transfer signature, but differ in indexed parameters
