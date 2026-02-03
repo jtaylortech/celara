@@ -265,3 +265,304 @@ def test_sync_batch_processing(monkeypatch) -> None:
     assert len(FakeLoader.loaded_blocks) == 5
     assert FakeLoader.loaded_blocks[0].number == 18000000
     assert FakeLoader.loaded_blocks[4].number == 18000004
+
+
+def test_sync_unsupported_chain(monkeypatch) -> None:
+    """Test sync with unsupported chain."""
+    from chainetl.cli import app
+
+    runner = CliRunner()
+    result = runner.invoke(app, ["sync", "--chain", "solana"])
+
+    assert result.exit_code == 1
+    assert "Chain 'solana' not supported" in result.stdout
+
+
+def test_sync_unsupported_destination(monkeypatch) -> None:
+    """Test sync with unsupported destination."""
+
+    class FakeExtractor:
+        def __init__(self, rpc_url: str) -> None:
+            pass
+
+    monkeypatch.setattr("chainetl.cli.EthereumExtractor", FakeExtractor)
+
+    from chainetl.cli import app
+
+    runner = CliRunner()
+    result = runner.invoke(app, ["sync", "--destination", "s3"])
+
+    assert result.exit_code == 1
+    assert "Destination 's3' not supported" in result.stdout
+
+
+def test_status_unsupported_chain(monkeypatch) -> None:
+    """Test status command with unsupported chain."""
+    from chainetl.cli import app
+
+    runner = CliRunner()
+    result = runner.invoke(app, ["status", "--chain", "polygon"])
+
+    assert result.exit_code == 1
+    assert "Chain 'polygon' not supported" in result.stdout
+
+
+def test_status_base_chain(monkeypatch) -> None:
+    """Test status command shows correct RPC for Base chain."""
+
+    class FakeLoader:
+        def __init__(self, connection_string: str) -> None:
+            pass
+
+        def load_checkpoint(self, chain: str) -> None:
+            return None
+
+    monkeypatch.setattr("chainetl.cli.PostgresLoader", FakeLoader)
+
+    from chainetl.cli import app
+
+    runner = CliRunner()
+    result = runner.invoke(app, ["status", "--chain", "base"])
+
+    assert result.exit_code == 0
+    assert "Chain: base" in result.stdout
+    assert "RPC:" in result.stdout
+
+
+def test_resume_no_checkpoint_fallback(monkeypatch) -> None:
+    """Test resume with no checkpoint falls back to latest block."""
+
+    class FakeExtractor:
+        def __init__(self, rpc_url: str) -> None:
+            pass
+
+        def extract_latest_block_number(self) -> int:
+            return 18000200
+
+        def extract_block(self, block_number: int) -> Block:
+            return Block(
+                number=block_number,
+                hash="0x" + "g" * 64,
+                parent_hash="0x" + "h" * 64,
+                timestamp=1234567890,
+                transactions=[],
+            )
+
+    class FakeLoader:
+        last_loaded = None
+
+        def __init__(self, connection_string: str) -> None:
+            pass
+
+        def load_checkpoint(self, chain: str) -> None:
+            return None
+
+        def load_block(self, block: Block) -> None:
+            FakeLoader.last_loaded = block
+
+        def save_checkpoint(self, checkpoint: Checkpoint) -> None:
+            pass
+
+        def detect_reorg(self, block: Block) -> bool:
+            return False
+
+    monkeypatch.setattr("chainetl.cli.EthereumExtractor", FakeExtractor)
+    monkeypatch.setattr("chainetl.cli.PostgresLoader", FakeLoader)
+
+    from chainetl.cli import app
+
+    runner = CliRunner()
+    result = runner.invoke(app, ["sync", "--resume"])
+
+    assert result.exit_code == 0
+    assert "No checkpoint found" in result.stdout
+    assert FakeLoader.last_loaded.number == 18000200
+
+
+def test_sync_detects_reorg(monkeypatch) -> None:
+    """Test that reorg detection triggers warning message."""
+
+    class FakeExtractor:
+        def __init__(self, rpc_url: str) -> None:
+            pass
+
+        def extract_block(self, block_number: int) -> Block:
+            return Block(
+                number=block_number,
+                hash="0x" + "i" * 64,
+                parent_hash="0x" + "j" * 64,
+                timestamp=1234567890,
+                transactions=[],
+            )
+
+    class FakeLoader:
+        def __init__(self, connection_string: str) -> None:
+            pass
+
+        def load_checkpoint(self, chain: str) -> None:
+            return None
+
+        def load_block(self, block: Block) -> None:
+            pass
+
+        def save_checkpoint(self, checkpoint: Checkpoint) -> None:
+            pass
+
+        def detect_reorg(self, block: Block) -> bool:
+            return True  # Simulate reorg detection
+
+    monkeypatch.setattr("chainetl.cli.EthereumExtractor", FakeExtractor)
+    monkeypatch.setattr("chainetl.cli.PostgresLoader", FakeLoader)
+
+    from chainetl.cli import app
+
+    runner = CliRunner()
+    result = runner.invoke(app, ["sync", "--start-block", "18000000"])
+
+    assert result.exit_code == 0
+    assert "WARNING: Chain reorganization detected" in result.stderr
+
+
+def test_sync_batch_detects_reorg(monkeypatch) -> None:
+    """Test that reorg detection in batch sync triggers warning."""
+
+    class FakeExtractor:
+        def __init__(self, rpc_url: str) -> None:
+            pass
+
+        def extract_blocks(self, start_block: int, end_block: int) -> list[Block]:
+            return [
+                Block(
+                    number=i,
+                    hash=f"0x{i:064x}",
+                    parent_hash=f"0x{i-1:064x}",
+                    timestamp=1234567890 + i,
+                    transactions=[],
+                )
+                for i in range(start_block, end_block + 1)
+            ]
+
+    class FakeLoader:
+        def __init__(self, connection_string: str) -> None:
+            pass
+
+        def load_checkpoint(self, chain: str) -> None:
+            return None
+
+        def load_blocks(self, blocks: list[Block]) -> None:
+            pass
+
+        def save_checkpoint(self, checkpoint: Checkpoint) -> None:
+            pass
+
+        def detect_reorg(self, block: Block) -> bool:
+            return True  # Simulate reorg
+
+    monkeypatch.setattr("chainetl.cli.EthereumExtractor", FakeExtractor)
+    monkeypatch.setattr("chainetl.cli.PostgresLoader", FakeLoader)
+
+    from chainetl.cli import app
+
+    runner = CliRunner()
+    result = runner.invoke(app, ["sync", "--start-block", "18000000", "--count", "3"])
+
+    assert result.exit_code == 0
+    assert "WARNING: Chain reorganization detected" in result.stderr
+
+
+def test_sync_large_batch_with_progress(monkeypatch) -> None:
+    """Test that large batch (>=10 blocks) shows progress bar."""
+
+    class FakeExtractor:
+        def __init__(self, rpc_url: str) -> None:
+            pass
+
+        def extract_block(self, block_number: int) -> Block:
+            return Block(
+                number=block_number,
+                hash=f"0x{block_number:064x}",
+                parent_hash=f"0x{block_number-1:064x}",
+                timestamp=1234567890 + block_number,
+                transactions=[],
+            )
+
+    class FakeLoader:
+        loaded_blocks = []
+
+        def __init__(self, connection_string: str) -> None:
+            FakeLoader.loaded_blocks = []
+
+        def load_checkpoint(self, chain: str) -> None:
+            return None
+
+        def load_blocks(self, blocks: list[Block]) -> None:
+            FakeLoader.loaded_blocks.extend(blocks)
+
+        def save_checkpoint(self, checkpoint: Checkpoint) -> None:
+            pass
+
+        def detect_reorg(self, block: Block) -> bool:
+            return False
+
+    monkeypatch.setattr("chainetl.cli.EthereumExtractor", FakeExtractor)
+    monkeypatch.setattr("chainetl.cli.PostgresLoader", FakeLoader)
+
+    from chainetl.cli import app
+
+    runner = CliRunner()
+    result = runner.invoke(app, ["sync", "--start-block", "18000000", "--count", "15"])
+
+    assert result.exit_code == 0
+    assert "Loaded 15 blocks" in result.stdout
+    assert len(FakeLoader.loaded_blocks) == 15
+
+
+def test_sync_exception_handling(monkeypatch) -> None:
+    """Test that exceptions during sync are handled gracefully."""
+
+    class FakeExtractor:
+        def __init__(self, rpc_url: str) -> None:
+            pass
+
+        def extract_block(self, block_number: int) -> Block:
+            raise ValueError("RPC connection failed")
+
+    class FakeLoader:
+        def __init__(self, connection_string: str) -> None:
+            pass
+
+        def load_checkpoint(self, chain: str) -> None:
+            return None
+
+    monkeypatch.setattr("chainetl.cli.EthereumExtractor", FakeExtractor)
+    monkeypatch.setattr("chainetl.cli.PostgresLoader", FakeLoader)
+
+    from chainetl.cli import app
+
+    runner = CliRunner()
+    result = runner.invoke(app, ["sync", "--start-block", "18000000"])
+
+    assert result.exit_code == 1
+    assert "Sync failed" in result.stdout
+
+
+def test_status_exception_handling(monkeypatch) -> None:
+    """Test that status command handles checkpoint loading errors gracefully."""
+
+    class FakeLoader:
+        def __init__(self, connection_string: str) -> None:
+            pass
+
+        def load_checkpoint(self, chain: str) -> None:
+            raise Exception("Database connection failed")
+
+    monkeypatch.setattr("chainetl.cli.PostgresLoader", FakeLoader)
+
+    from chainetl.cli import app
+
+    runner = CliRunner()
+    result = runner.invoke(app, ["status", "--chain", "ethereum"])
+
+    # Should not crash, just log the error
+    assert result.exit_code == 0
+    assert "Chain: ethereum" in result.stdout
