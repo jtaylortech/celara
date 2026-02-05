@@ -22,11 +22,11 @@ def test_postgres_loader_with_sqlite() -> None:
         transactions=[],
     )
 
-    loader.load_block(block)
+    loader.load_block(block, "ethereum")
 
     # Verify inserted row exists
     with Session(loader.engine) as session:
-        db_block = session.get(BlockTable, 42)
+        db_block = session.query(BlockTable).filter_by(chain="ethereum", number=42).first()
         assert db_block is not None
         assert db_block.hash == block.hash
 
@@ -119,19 +119,19 @@ def test_batch_load_blocks() -> None:
         for i in range(1, 11)
     ]
 
-    loader.load_blocks(blocks)
+    loader.load_blocks(blocks, "ethereum")
 
     # Verify all blocks were inserted
     with Session(loader.engine) as session:
-        count = session.query(BlockTable).count()
+        count = session.query(BlockTable).filter_by(chain="ethereum").count()
         assert count == 10
 
         # Check first and last block
-        first = session.get(BlockTable, 1)
+        first = session.query(BlockTable).filter_by(chain="ethereum", number=1).first()
         assert first is not None
         assert first.hash == "0x" + "1".zfill(64)
 
-        last = session.get(BlockTable, 10)
+        last = session.query(BlockTable).filter_by(chain="ethereum", number=10).first()
         assert last is not None
         assert last.hash == "0x" + "a".zfill(64)
 
@@ -142,7 +142,7 @@ def test_batch_load_empty_list() -> None:
     """Test loading an empty list of blocks doesn't error."""
 
     loader = PostgresLoader("sqlite:///:memory:")
-    loader.load_blocks([])  # Should not raise
+    loader.load_blocks([], "ethereum")  # Should not raise
 
     # Verify no blocks were inserted
     with Session(loader.engine) as session:
@@ -166,7 +166,7 @@ def test_reorg_detection_no_previous_block() -> None:
     )
 
     # Should return False (no reorg) when there's no previous block
-    assert loader.detect_reorg(block) is False
+    assert loader.detect_reorg("ethereum", block) is False
 
     loader.engine.dispose()
 
@@ -184,7 +184,7 @@ def test_reorg_detection_valid_chain() -> None:
         timestamp=1234567890,
         transactions=[],
     )
-    loader.load_block(block99)
+    loader.load_block(block99, "ethereum")
 
     # Load block 100 with correct parent_hash
     block100 = Block(
@@ -196,7 +196,7 @@ def test_reorg_detection_valid_chain() -> None:
     )
 
     # Should return False (no reorg)
-    assert loader.detect_reorg(block100) is False
+    assert loader.detect_reorg("ethereum", block100) is False
 
     loader.engine.dispose()
 
@@ -214,7 +214,7 @@ def test_reorg_detection_invalid_chain() -> None:
         timestamp=1234567890,
         transactions=[],
     )
-    loader.load_block(block99)
+    loader.load_block(block99, "ethereum")
 
     # Load block 100 with INCORRECT parent_hash
     block100 = Block(
@@ -226,7 +226,7 @@ def test_reorg_detection_invalid_chain() -> None:
     )
 
     # Should return True (reorg detected)
-    assert loader.detect_reorg(block100) is True
+    assert loader.detect_reorg("ethereum", block100) is True
 
     loader.engine.dispose()
 
@@ -244,16 +244,16 @@ def test_get_block_by_number() -> None:
         timestamp=1234567890,
         transactions=[],
     )
-    loader.load_block(block)
+    loader.load_block(block, "ethereum")
 
     # Retrieve it
-    retrieved = loader.get_block_by_number(42)
+    retrieved = loader.get_block_by_number("ethereum", 42)
     assert retrieved is not None
     assert retrieved.number == 42
     assert retrieved.hash == "0x" + "a" * 64
 
     # Try to get non-existent block
-    none_block = loader.get_block_by_number(999)
+    none_block = loader.get_block_by_number("ethereum", 999)
     assert none_block is None
 
     loader.engine.dispose()

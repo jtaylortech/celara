@@ -38,18 +38,20 @@ def retry_with_backoff(
 
     for attempt in range(max_retries + 1):
         try:
-            logger.info(
-                "retry_attempt",
-                attempt=attempt,
-                max_retries=max_retries,
-            )
+            # Only log retry attempts (not the first attempt)
+            if attempt > 0:
+                logger.info(
+                    "retry_attempt",
+                    attempt=attempt,
+                    max_retries=max_retries,
+                )
             return func()
         except Exception as e:
             last_exception = e
             if attempt < max_retries:
                 logger.warning(
                     "retry_failed_backing_off",
-                    attempt=attempt,
+                    attempt=attempt + 1,
                     delay=delay,
                     error=str(e),
                 )

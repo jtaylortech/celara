@@ -1,5 +1,7 @@
 """Postgres data loader."""
 
+import re
+
 import structlog
 from sqlalchemy import BigInteger, Column, DateTime, Integer, String, Text, create_engine
 from sqlalchemy.orm import Session, declarative_base
@@ -15,11 +17,25 @@ logger = structlog.get_logger()
 Base = declarative_base()
 
 
+def _sanitize_connection_string(connection_string: str) -> str:
+    """Sanitize database connection string by masking the password.
+
+    Args:
+        connection_string: Database connection string
+
+    Returns:
+        Sanitized connection string with password masked
+    """
+    # Mask password in connection string (postgresql://user:PASSWORD@host/db)
+    return re.sub(r"(:)([^@:]+)(@)", r"\1***\3", connection_string)
+
+
 class BlockTable(Base):  # type: ignore[misc,valid-type]
     """Blocks table."""
 
     __tablename__ = "blocks"
 
+    chain = Column(String, primary_key=True)
     number = Column(BigInteger, primary_key=True)
     hash = Column(String, unique=True, nullable=False)
     parent_hash = Column(String, nullable=False)
@@ -108,16 +124,21 @@ class PostgresLoader(BaseLoader):
         """
         self.engine = create_engine(connection_string)
         Base.metadata.create_all(self.engine)
-        logger.info("postgres_loader_initialized", connection_string=connection_string)
+        logger.info(
+            "postgres_loader_initialized",
+            connection_string=_sanitize_connection_string(connection_string),
+        )
 
-    def load_block(self, block: Block) -> None:
+    def load_block(self, block: Block, chain: str) -> None:
         """Load a block to Postgres.
 
         Args:
             block: Block to load
+            chain: Chain identifier (e.g., "ethereum", "base")
         """
         with Session(self.engine) as session:
             db_block = BlockTable(
+                chain=chain,
                 number=block.number,
                 hash=block.hash,
                 parent_hash=block.parent_hash,
@@ -125,13 +146,14 @@ class PostgresLoader(BaseLoader):
             )
             session.merge(db_block)  # Insert or update
             session.commit()
-            logger.info("block_loaded", block_number=block.number)
+            logger.info("block_loaded", chain=chain, block_number=block.number)
 
-    def load_blocks(self, blocks: list[Block]) -> None:
+    def load_blocks(self, blocks: list[Block], chain: str) -> None:
         """Load multiple blocks to Postgres in a batch.
 
         Args:
             blocks: List of blocks to load
+            chain: Chain identifier (e.g., "ethereum", "base")
         """
         if not blocks:
             logger.warning("load_blocks_called_with_empty_list")
@@ -140,6 +162,7 @@ class PostgresLoader(BaseLoader):
         with Session(self.engine) as session:
             for block in blocks:
                 db_block = BlockTable(
+                    chain=chain,
                     number=block.number,
                     hash=block.hash,
                     parent_hash=block.parent_hash,
@@ -148,7 +171,7 @@ class PostgresLoader(BaseLoader):
                 session.merge(db_block)  # Insert or update
 
             session.commit()
-            logger.info("blocks_loaded", count=len(blocks))
+            logger.info("blocks_loaded", chain=chain, count=len(blocks))
 
     def save_checkpoint(self, checkpoint: Checkpoint) -> None:
         """Save a checkpoint to track sync progress.
@@ -201,17 +224,22 @@ class PostgresLoader(BaseLoader):
             )
             return checkpoint
 
-    def get_block_by_number(self, block_number: int) -> Block | None:
+    def get_block_by_number(self, chain: str, block_number: int) -> Block | None:
         """Get a block from the database by its number.
 
         Args:
+            chain: Chain identifier (e.g., "ethereum", "base")
             block_number: Block number to retrieve
 
         Returns:
             Block if found, None otherwise
         """
         with Session(self.engine) as session:
-            db_block = session.query(BlockTable).filter_by(number=block_number).first()
+            db_block = (
+                session.query(BlockTable)
+                .filter_by(chain=chain, number=block_number)
+                .first()
+            )
             if db_block is None:
                 return None
 
@@ -222,17 +250,18 @@ class PostgresLoader(BaseLoader):
                 timestamp=db_block.timestamp,  # type: ignore[arg-type]
             )
 
-    def detect_reorg(self, new_block: Block) -> bool:
+    def detect_reorg(self, chain: str, new_block: Block) -> bool:
         """Detect if a block indicates a chain reorganization.
 
         Args:
+            chain: Chain identifier (e.g., "ethereum", "base")
             new_block: The new block to check
 
         Returns:
             True if a reorg is detected, False otherwise
         """
         # Get the previous block from the database
-        prev_block = self.get_block_by_number(new_block.number - 1)
+        prev_block = self.get_block_by_number(chain, new_block.number - 1)
 
         if prev_block is None:
             # No previous block in DB, can't detect reorg
@@ -242,6 +271,7 @@ class PostgresLoader(BaseLoader):
         if new_block.parent_hash != prev_block.hash:
             logger.warning(
                 "reorg_detected",
+                chain=chain,
                 block_number=new_block.number,
                 expected_parent=prev_block.hash,
                 actual_parent=new_block.parent_hash,

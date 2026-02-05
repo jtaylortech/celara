@@ -64,3 +64,10 @@ class BaseExtractor(ABC):
             ValueError: If unable to fetch latest block number
         """
         pass
+
+    def close(self) -> None:
+        """Close any open connections and cleanup resources.
+
+        Subclasses should override this if they need cleanup.
+        """
+        pass
