@@ -1,6 +1,8 @@
 """Postgres data loader."""
 
+import json
 import re
+from typing import Any
 
 import structlog
 from sqlalchemy import BigInteger, Column, DateTime, Integer, String, Text, create_engine
@@ -17,24 +19,16 @@ logger = structlog.get_logger()
 Base = declarative_base()
 
 
-def _sanitize_connection_string(connection_string: str) -> str:
-    """Sanitize database connection string by masking the password.
+def _sanitize_connection_string(cs: str) -> str:
+    """Mask password in connection string."""
+    return re.sub(r"(:)([^@:]+)(@)", r"\1***\3", cs)
 
-    Args:
-        connection_string: Database connection string
 
-    Returns:
-        Sanitized connection string with password masked
-    """
-    # Mask password in connection string (postgresql://user:PASSWORD@host/db)
-    return re.sub(r"(:)([^@:]+)(@)", r"\1***\3", connection_string)
+# --- Table definitions ---
 
 
 class BlockTable(Base):  # type: ignore[misc,valid-type]
-    """Blocks table."""
-
     __tablename__ = "blocks"
-
     chain = Column(String, primary_key=True)
     number = Column(BigInteger, primary_key=True)
     hash = Column(String, unique=True, nullable=False)
@@ -43,10 +37,7 @@ class BlockTable(Base):  # type: ignore[misc,valid-type]
 
 
 class CheckpointTable(Base):  # type: ignore[misc,valid-type]
-    """Checkpoints table for tracking sync progress."""
-
     __tablename__ = "checkpoints"
-
     chain = Column(String, primary_key=True)
     last_synced_block = Column(BigInteger, nullable=False)
     last_synced_hash = Column(String, nullable=False)
@@ -55,10 +46,7 @@ class CheckpointTable(Base):  # type: ignore[misc,valid-type]
 
 
 class TransactionTable(Base):  # type: ignore[misc,valid-type]
-    """Transactions table."""
-
     __tablename__ = "transactions"
-
     hash = Column(String, primary_key=True)
     block_number = Column(BigInteger, nullable=False, index=True)
     block_hash = Column(String, nullable=False)
@@ -80,26 +68,18 @@ class TransactionTable(Base):  # type: ignore[misc,valid-type]
 
 
 class LogTable(Base):  # type: ignore[misc,valid-type]
-    """Logs table for smart contract events."""
-
     __tablename__ = "logs"
-
-    # Composite primary key: (transaction_hash, log_index)
     transaction_hash = Column(String, primary_key=True)
     log_index = Column(Integer, primary_key=True)
     block_number = Column(BigInteger, nullable=False, index=True)
     block_hash = Column(String, nullable=False)
     address = Column(String, nullable=False, index=True)
     data = Column(Text, nullable=False)
-    topics = Column(Text, nullable=False)  # Stored as JSON array
+    topics = Column(Text, nullable=False)
 
 
 class TokenTransferTable(Base):  # type: ignore[misc,valid-type]
-    """Token transfers table for ERC-20, ERC-721, ERC-1155 events."""
-
     __tablename__ = "token_transfers"
-
-    # Composite primary key: (transaction_hash, log_index)
     transaction_hash = Column(String, primary_key=True)
     log_index = Column(Integer, primary_key=True)
     block_number = Column(BigInteger, nullable=False, index=True)
@@ -113,15 +93,77 @@ class TokenTransferTable(Base):  # type: ignore[misc,valid-type]
     token_decimals = Column(Integer, nullable=True)
 
 
+# --- Model → Table row mappers ---
+
+
+def _block_to_row(block: Block, chain: str) -> dict[str, Any]:
+    return dict(
+        chain=chain,
+        number=block.number,
+        hash=block.hash,
+        parent_hash=block.parent_hash,
+        timestamp=block.timestamp,
+    )
+
+
+def _tx_to_row(tx: Transaction) -> dict[str, Any]:
+    return dict(
+        hash=tx.hash,
+        block_number=tx.block_number,
+        block_hash=tx.block_hash,
+        transaction_index=tx.transaction_index,
+        from_address=tx.from_address,
+        to_address=tx.to_address,
+        value=tx.value,
+        input=tx.input,
+        gas=tx.gas,
+        gas_price=tx.gas_price,
+        max_fee_per_gas=tx.max_fee_per_gas,
+        max_priority_fee_per_gas=tx.max_priority_fee_per_gas,
+        nonce=tx.nonce,
+        transaction_type=tx.transaction_type,
+        chain_id=tx.chain_id,
+        v=tx.v,
+        r=tx.r,
+        s=tx.s,
+    )
+
+
+def _log_to_row(log: Log) -> dict[str, Any]:
+    return dict(
+        transaction_hash=log.transaction_hash,
+        log_index=log.log_index,
+        block_number=log.block_number,
+        block_hash=log.block_hash,
+        address=log.address,
+        data=log.data,
+        topics=json.dumps(log.topics),
+    )
+
+
+def _transfer_to_row(t: TokenTransfer) -> dict[str, Any]:
+    return dict(
+        transaction_hash=t.transaction_hash,
+        log_index=t.log_index,
+        block_number=t.block_number,
+        token_address=t.token_address,
+        token_standard=t.token_standard,
+        from_address=t.from_address,
+        to_address=t.to_address,
+        value=t.value,
+        token_name=t.token_name,
+        token_symbol=t.token_symbol,
+        token_decimals=t.token_decimals,
+    )
+
+
+# --- Loader ---
+
+
 class PostgresLoader(BaseLoader):
-    """Load data to Postgres."""
+    """Load blockchain data to PostgreSQL."""
 
     def __init__(self, connection_string: str) -> None:
-        """Initialize Postgres loader.
-
-        Args:
-            connection_string: Postgres connection string
-        """
         self.engine = create_engine(connection_string)
         Base.metadata.create_all(self.engine)
         logger.info(
@@ -129,328 +171,126 @@ class PostgresLoader(BaseLoader):
             connection_string=_sanitize_connection_string(connection_string),
         )
 
-    def load_block(self, block: Block, chain: str) -> None:
-        """Load a block to Postgres.
-
-        Args:
-            block: Block to load
-            chain: Chain identifier (e.g., "ethereum", "base")
-        """
+    def _merge_batch(
+        self, table_cls: type, rows: list[dict[str, Any]], label: str
+    ) -> None:
+        """Generic batch upsert."""
+        if not rows:
+            return
         with Session(self.engine) as session:
-            db_block = BlockTable(
-                chain=chain,
-                number=block.number,
-                hash=block.hash,
-                parent_hash=block.parent_hash,
-                timestamp=block.timestamp,
-            )
-            session.merge(db_block)  # Insert or update
+            for row in rows:
+                session.merge(table_cls(**row))
             session.commit()
-            logger.info("block_loaded", chain=chain, block_number=block.number)
+        logger.info(f"{label}_loaded", count=len(rows))
+
+    # --- Blocks ---
+
+    def load_block(self, block: Block, chain: str) -> None:
+        self._merge_batch(
+            BlockTable, [_block_to_row(block, chain)], "block"
+        )
 
     def load_blocks(self, blocks: list[Block], chain: str) -> None:
-        """Load multiple blocks to Postgres in a batch.
+        self._merge_batch(
+            BlockTable,
+            [_block_to_row(b, chain) for b in blocks],
+            "blocks",
+        )
 
-        Args:
-            blocks: List of blocks to load
-            chain: Chain identifier (e.g., "ethereum", "base")
-        """
-        if not blocks:
-            logger.warning("load_blocks_called_with_empty_list")
-            return
-
-        with Session(self.engine) as session:
-            for block in blocks:
-                db_block = BlockTable(
-                    chain=chain,
-                    number=block.number,
-                    hash=block.hash,
-                    parent_hash=block.parent_hash,
-                    timestamp=block.timestamp,
-                )
-                session.merge(db_block)  # Insert or update
-
-            session.commit()
-            logger.info("blocks_loaded", chain=chain, count=len(blocks))
+    # --- Checkpoints ---
 
     def save_checkpoint(self, checkpoint: Checkpoint) -> None:
-        """Save a checkpoint to track sync progress.
-
-        Args:
-            checkpoint: Checkpoint to save
-        """
         with Session(self.engine) as session:
-            db_checkpoint = CheckpointTable(
+            session.merge(CheckpointTable(
                 chain=checkpoint.chain,
                 last_synced_block=checkpoint.last_synced_block,
                 last_synced_hash=checkpoint.last_synced_hash,
                 synced_at=checkpoint.synced_at,
                 status=checkpoint.status,
-            )
-            session.merge(db_checkpoint)  # Insert or update
+            ))
             session.commit()
-            logger.info(
-                "checkpoint_saved",
-                chain=checkpoint.chain,
-                block=checkpoint.last_synced_block,
-            )
+        logger.info(
+            "checkpoint_saved",
+            chain=checkpoint.chain,
+            block=checkpoint.last_synced_block,
+        )
 
     def load_checkpoint(self, chain: str) -> Checkpoint | None:
-        """Load the latest checkpoint for a chain.
-
-        Args:
-            chain: Chain name (e.g., "ethereum", "base")
-
-        Returns:
-            Checkpoint if exists, None otherwise
-        """
         with Session(self.engine) as session:
-            db_checkpoint = session.query(CheckpointTable).filter_by(chain=chain).first()
-            if db_checkpoint is None:
+            row = (
+                session.query(CheckpointTable)
+                .filter_by(chain=chain)
+                .first()
+            )
+            if row is None:
                 logger.info("no_checkpoint_found", chain=chain)
                 return None
-
-            checkpoint = Checkpoint(
-                chain=db_checkpoint.chain,  # type: ignore[arg-type]
-                last_synced_block=db_checkpoint.last_synced_block,  # type: ignore[arg-type]
-                last_synced_hash=db_checkpoint.last_synced_hash,  # type: ignore[arg-type]
-                synced_at=db_checkpoint.synced_at,  # type: ignore[arg-type]
-                status=db_checkpoint.status,  # type: ignore[arg-type]
+            return Checkpoint(
+                chain=row.chain,  # type: ignore[arg-type]
+                last_synced_block=row.last_synced_block,  # type: ignore[arg-type]
+                last_synced_hash=row.last_synced_hash,  # type: ignore[arg-type]
+                synced_at=row.synced_at,  # type: ignore[arg-type]
+                status=row.status,  # type: ignore[arg-type]
             )
-            logger.info(
-                "checkpoint_loaded",
-                chain=chain,
-                block=checkpoint.last_synced_block,
-            )
-            return checkpoint
 
-    def get_block_by_number(self, chain: str, block_number: int) -> Block | None:
-        """Get a block from the database by its number.
+    # --- Reorg detection ---
 
-        Args:
-            chain: Chain identifier (e.g., "ethereum", "base")
-            block_number: Block number to retrieve
-
-        Returns:
-            Block if found, None otherwise
-        """
+    def get_block_by_number(
+        self, chain: str, block_number: int
+    ) -> Block | None:
         with Session(self.engine) as session:
-            db_block = (
+            row = (
                 session.query(BlockTable)
                 .filter_by(chain=chain, number=block_number)
                 .first()
             )
-            if db_block is None:
+            if row is None:
                 return None
-
             return Block(
-                number=db_block.number,  # type: ignore[arg-type]
-                hash=db_block.hash,  # type: ignore[arg-type]
-                parent_hash=db_block.parent_hash,  # type: ignore[arg-type]
-                timestamp=db_block.timestamp,  # type: ignore[arg-type]
+                number=row.number,  # type: ignore[arg-type]
+                hash=row.hash,  # type: ignore[arg-type]
+                parent_hash=row.parent_hash,  # type: ignore[arg-type]
+                timestamp=row.timestamp,  # type: ignore[arg-type]
             )
 
     def detect_reorg(self, chain: str, new_block: Block) -> bool:
-        """Detect if a block indicates a chain reorganization.
-
-        Args:
-            chain: Chain identifier (e.g., "ethereum", "base")
-            new_block: The new block to check
-
-        Returns:
-            True if a reorg is detected, False otherwise
-        """
-        # Get the previous block from the database
-        prev_block = self.get_block_by_number(chain, new_block.number - 1)
-
-        if prev_block is None:
-            # No previous block in DB, can't detect reorg
+        prev = self.get_block_by_number(chain, new_block.number - 1)
+        if prev is None:
             return False
-
-        # Check if the new block's parent_hash matches the previous block's hash
-        if new_block.parent_hash != prev_block.hash:
+        if new_block.parent_hash != prev.hash:
             logger.warning(
                 "reorg_detected",
                 chain=chain,
                 block_number=new_block.number,
-                expected_parent=prev_block.hash,
+                expected_parent=prev.hash,
                 actual_parent=new_block.parent_hash,
             )
             return True
-
         return False
 
-    def load_transaction(self, transaction: Transaction) -> None:
-        """Load a transaction to Postgres.
-
-        Args:
-            transaction: Transaction to load
-        """
-        with Session(self.engine) as session:
-            db_tx = TransactionTable(
-                hash=transaction.hash,
-                block_number=transaction.block_number,
-                block_hash=transaction.block_hash,
-                transaction_index=transaction.transaction_index,
-                from_address=transaction.from_address,
-                to_address=transaction.to_address,
-                value=transaction.value,
-                input=transaction.input,
-                gas=transaction.gas,
-                gas_price=transaction.gas_price,
-                max_fee_per_gas=transaction.max_fee_per_gas,
-                max_priority_fee_per_gas=transaction.max_priority_fee_per_gas,
-                nonce=transaction.nonce,
-                transaction_type=transaction.transaction_type,
-                chain_id=transaction.chain_id,
-                v=transaction.v,
-                r=transaction.r,
-                s=transaction.s,
-            )
-            session.merge(db_tx)
-            session.commit()
-            logger.debug("transaction_loaded", transaction_hash=transaction.hash)
+    # --- Transactions ---
 
     def load_transactions(self, transactions: list[Transaction]) -> None:
-        """Load multiple transactions to Postgres in a batch.
+        self._merge_batch(
+            TransactionTable,
+            [_tx_to_row(tx) for tx in transactions],
+            "transactions",
+        )
 
-        Args:
-            transactions: List of transactions to load
-        """
-        if not transactions:
-            return
-
-        with Session(self.engine) as session:
-            for tx in transactions:
-                db_tx = TransactionTable(
-                    hash=tx.hash,
-                    block_number=tx.block_number,
-                    block_hash=tx.block_hash,
-                    transaction_index=tx.transaction_index,
-                    from_address=tx.from_address,
-                    to_address=tx.to_address,
-                    value=tx.value,
-                    input=tx.input,
-                    gas=tx.gas,
-                    gas_price=tx.gas_price,
-                    max_fee_per_gas=tx.max_fee_per_gas,
-                    max_priority_fee_per_gas=tx.max_priority_fee_per_gas,
-                    nonce=tx.nonce,
-                    transaction_type=tx.transaction_type,
-                    chain_id=tx.chain_id,
-                    v=tx.v,
-                    r=tx.r,
-                    s=tx.s,
-                )
-                session.merge(db_tx)
-
-            session.commit()
-            logger.info("transactions_loaded", count=len(transactions))
-
-    def load_log(self, log: Log) -> None:
-        """Load a log to Postgres.
-
-        Args:
-            log: Log to load
-        """
-        import json
-
-        with Session(self.engine) as session:
-            db_log = LogTable(
-                transaction_hash=log.transaction_hash,
-                log_index=log.log_index,
-                block_number=log.block_number,
-                block_hash=log.block_hash,
-                address=log.address,
-                data=log.data,
-                topics=json.dumps(log.topics),  # Convert list to JSON string
-            )
-            session.merge(db_log)
-            session.commit()
-            logger.debug(
-                "log_loaded", transaction_hash=log.transaction_hash, log_index=log.log_index
-            )
+    # --- Logs ---
 
     def load_logs(self, logs: list[Log]) -> None:
-        """Load multiple logs to Postgres in a batch.
+        self._merge_batch(
+            LogTable, [_log_to_row(log) for log in logs], "logs"
+        )
 
-        Args:
-            logs: List of logs to load
-        """
-        if not logs:
-            return
+    # --- Token transfers ---
 
-        import json
-
-        with Session(self.engine) as session:
-            for log in logs:
-                db_log = LogTable(
-                    transaction_hash=log.transaction_hash,
-                    log_index=log.log_index,
-                    block_number=log.block_number,
-                    block_hash=log.block_hash,
-                    address=log.address,
-                    data=log.data,
-                    topics=json.dumps(log.topics),
-                )
-                session.merge(db_log)
-
-            session.commit()
-            logger.info("logs_loaded", count=len(logs))
-
-    def load_token_transfer(self, token_transfer: TokenTransfer) -> None:
-        """Load a token transfer to Postgres.
-
-        Args:
-            token_transfer: TokenTransfer to load
-        """
-        with Session(self.engine) as session:
-            db_transfer = TokenTransferTable(
-                transaction_hash=token_transfer.transaction_hash,
-                log_index=token_transfer.log_index,
-                block_number=token_transfer.block_number,
-                token_address=token_transfer.token_address,
-                token_standard=token_transfer.token_standard,
-                from_address=token_transfer.from_address,
-                to_address=token_transfer.to_address,
-                value=token_transfer.value,
-                token_name=token_transfer.token_name,
-                token_symbol=token_transfer.token_symbol,
-                token_decimals=token_transfer.token_decimals,
-            )
-            session.merge(db_transfer)
-            session.commit()
-            logger.debug(
-                "token_transfer_loaded",
-                transaction_hash=token_transfer.transaction_hash,
-                log_index=token_transfer.log_index,
-            )
-
-    def load_token_transfers(self, token_transfers: list[TokenTransfer]) -> None:
-        """Load multiple token transfers to Postgres in a batch.
-
-        Args:
-            token_transfers: List of token transfers to load
-        """
-        if not token_transfers:
-            return
-
-        with Session(self.engine) as session:
-            for transfer in token_transfers:
-                db_transfer = TokenTransferTable(
-                    transaction_hash=transfer.transaction_hash,
-                    log_index=transfer.log_index,
-                    block_number=transfer.block_number,
-                    token_address=transfer.token_address,
-                    token_standard=transfer.token_standard,
-                    from_address=transfer.from_address,
-                    to_address=transfer.to_address,
-                    value=transfer.value,
-                    token_name=transfer.token_name,
-                    token_symbol=transfer.token_symbol,
-                    token_decimals=transfer.token_decimals,
-                )
-                session.merge(db_transfer)
-
-            session.commit()
-            logger.info("token_transfers_loaded", count=len(token_transfers))
+    def load_token_transfers(
+        self, token_transfers: list[TokenTransfer]
+    ) -> None:
+        self._merge_batch(
+            TokenTransferTable,
+            [_transfer_to_row(t) for t in token_transfers],
+            "token_transfers",
+        )
