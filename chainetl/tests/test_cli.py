@@ -11,7 +11,6 @@ from chainetl.models.checkpoint import Checkpoint
 def test_sync_cli_monkeypatched(monkeypatch) -> None:
     """Invoke `chainetl sync` with fake extractor and loader to test flow."""
 
-    # Fake extractor that returns a known block
     class FakeExtractor:
         def __init__(self, rpc_url: str) -> None:
             self.rpc_url = rpc_url
@@ -28,7 +27,9 @@ def test_sync_cli_monkeypatched(monkeypatch) -> None:
                 transactions=[],
             )
 
-    # Fake loader that records the last loaded block
+        def close(self) -> None:
+            pass
+
     class FakeLoader:
         last_loaded = None
         last_checkpoint = None
@@ -36,7 +37,7 @@ def test_sync_cli_monkeypatched(monkeypatch) -> None:
         def __init__(self, connection_string: str) -> None:
             self.connection_string = connection_string
 
-        def load_block(self, block: Block) -> None:
+        def load_block(self, block: Block, chain: str) -> None:
             FakeLoader.last_loaded = block
 
         def save_checkpoint(self, checkpoint: Checkpoint) -> None:
@@ -45,10 +46,9 @@ def test_sync_cli_monkeypatched(monkeypatch) -> None:
         def load_checkpoint(self, chain: str) -> Checkpoint | None:
             return None
 
-        def detect_reorg(self, block: Block) -> bool:
+        def detect_reorg(self, chain: str, block: Block) -> bool:
             return False
 
-    # Monkeypatch the classes in the cli module
     monkeypatch.setattr("chainetl.cli.EthereumExtractor", FakeExtractor)
     monkeypatch.setattr("chainetl.cli.PostgresLoader", FakeLoader)
 
@@ -57,7 +57,7 @@ def test_sync_cli_monkeypatched(monkeypatch) -> None:
     runner = CliRunner()
     result = runner.invoke(app, ["sync", "--start-block", "18000000"])
 
-    assert result.exit_code == 0
+    assert result.exit_code == 0, result.stdout
     assert "Loaded block 18000000" in result.stdout
     assert FakeLoader.last_loaded is not None
     assert FakeLoader.last_loaded.number == 18000000
@@ -130,13 +130,16 @@ def test_sync_with_base_chain(monkeypatch) -> None:
                 transactions=[],
             )
 
+        def close(self) -> None:
+            pass
+
     class FakeLoader:
         last_loaded = None
 
         def __init__(self, connection_string: str) -> None:
             pass
 
-        def load_block(self, block: Block) -> None:
+        def load_block(self, block: Block, chain: str) -> None:
             FakeLoader.last_loaded = block
 
         def save_checkpoint(self, checkpoint: Checkpoint) -> None:
@@ -145,7 +148,7 @@ def test_sync_with_base_chain(monkeypatch) -> None:
         def load_checkpoint(self, chain: str) -> None:
             return None
 
-        def detect_reorg(self, block: Block) -> bool:
+        def detect_reorg(self, chain: str, block: Block) -> bool:
             return False
 
     monkeypatch.setattr("chainetl.cli.BaseL2Extractor", FakeBaseExtractor)
@@ -156,7 +159,7 @@ def test_sync_with_base_chain(monkeypatch) -> None:
     runner = CliRunner()
     result = runner.invoke(app, ["sync", "--chain", "base", "--start-block", "10000000"])
 
-    assert result.exit_code == 0
+    assert result.exit_code == 0, result.stdout
     assert "Loaded block 10000000" in result.stdout
     assert FakeLoader.last_loaded.number == 10000000
 
@@ -177,6 +180,9 @@ def test_sync_with_resume(monkeypatch) -> None:
                 transactions=[],
             )
 
+        def close(self) -> None:
+            pass
+
     class FakeLoader:
         last_loaded = None
 
@@ -192,13 +198,13 @@ def test_sync_with_resume(monkeypatch) -> None:
                 status="active",
             )
 
-        def load_block(self, block: Block) -> None:
+        def load_block(self, block: Block, chain: str) -> None:
             FakeLoader.last_loaded = block
 
         def save_checkpoint(self, checkpoint: Checkpoint) -> None:
             pass
 
-        def detect_reorg(self, block: Block) -> bool:
+        def detect_reorg(self, chain: str, block: Block) -> bool:
             return False
 
     monkeypatch.setattr("chainetl.cli.EthereumExtractor", FakeExtractor)
@@ -209,7 +215,7 @@ def test_sync_with_resume(monkeypatch) -> None:
     runner = CliRunner()
     result = runner.invoke(app, ["sync", "--chain", "ethereum", "--resume"])
 
-    assert result.exit_code == 0
+    assert result.exit_code == 0, result.stdout
     assert "Resuming from checkpoint" in result.stdout
     assert "18000050 -> 18000051" in result.stdout
     assert FakeLoader.last_loaded.number == 18000051
@@ -234,8 +240,11 @@ def test_sync_batch_processing(monkeypatch) -> None:
                 for i in range(start_block, end_block + 1)
             ]
 
+        def close(self) -> None:
+            pass
+
     class FakeLoader:
-        loaded_blocks = []
+        loaded_blocks: list[Block] = []
 
         def __init__(self, connection_string: str) -> None:
             FakeLoader.loaded_blocks = []
@@ -243,13 +252,13 @@ def test_sync_batch_processing(monkeypatch) -> None:
         def load_checkpoint(self, chain: str) -> None:
             return None
 
-        def load_blocks(self, blocks: list[Block]) -> None:
+        def load_blocks(self, blocks: list[Block], chain: str) -> None:
             FakeLoader.loaded_blocks.extend(blocks)
 
         def save_checkpoint(self, checkpoint: Checkpoint) -> None:
             pass
 
-        def detect_reorg(self, block: Block) -> bool:
+        def detect_reorg(self, chain: str, block: Block) -> bool:
             return False
 
     monkeypatch.setattr("chainetl.cli.EthereumExtractor", FakeExtractor)
@@ -260,7 +269,7 @@ def test_sync_batch_processing(monkeypatch) -> None:
     runner = CliRunner()
     result = runner.invoke(app, ["sync", "--start-block", "18000000", "--count", "5"])
 
-    assert result.exit_code == 0
+    assert result.exit_code == 0, result.stdout
     assert "Loaded 5 blocks" in result.stdout
     assert len(FakeLoader.loaded_blocks) == 5
     assert FakeLoader.loaded_blocks[0].number == 18000000

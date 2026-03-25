@@ -1,7 +1,6 @@
 """Command-line interface."""
 
 import signal
-import sys
 from datetime import UTC, datetime
 
 import structlog

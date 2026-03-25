@@ -13,4 +13,5 @@ def test_settings_env_override(monkeypatch, tmp_path, capsys) -> None:
 
     importlib.reload(config_module)
 
-    assert config_module.settings.ethereum_rpc_url == "http://localhost:8545"
+    # Pydantic HttpUrl normalizes URLs (may add trailing slash)
+    assert str(config_module.settings.ethereum_rpc_url).rstrip("/") == "http://localhost:8545"
