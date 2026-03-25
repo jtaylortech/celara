@@ -1,6 +1,8 @@
+"""Log/event data models."""
+
 from typing import Any
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class Log(BaseModel):
@@ -9,11 +11,20 @@ class Log(BaseModel):
     address: str = Field(..., description="Contract address")
     topics: list[str] = Field(default_factory=list, description="Indexed topics")
     data: str = Field("0x", description="Data payload")
-    log_index: int | None = Field(None, alias="logIndex", description="Log index in block")
+    log_index: int | None = Field(
+        None, alias="logIndex", description="Log index in block"
+    )
     transaction_hash: str | None = Field(
         None, alias="transactionHash", description="Transaction hash"
     )
-    block_number: int | None = Field(None, alias="blockNumber", description="Block number")
+    block_number: int | None = Field(
+        None, alias="blockNumber", description="Block number"
+    )
+    block_hash: str | None = Field(
+        None, alias="blockHash", description="Block hash"
+    )
+
+    model_config = ConfigDict(populate_by_name=True)
 
     @classmethod
     def from_rpc(cls, data: dict[str, Any]) -> "Log":
@@ -27,5 +38,8 @@ class Log(BaseModel):
             data=data.get("data", "0x"),
             logIndex=int(log_index_raw, 16) if log_index_raw is not None else None,
             transactionHash=data.get("transactionHash"),
-            blockNumber=int(block_number_raw, 16) if block_number_raw is not None else None,
+            blockNumber=(
+                int(block_number_raw, 16) if block_number_raw is not None else None
+            ),
+            blockHash=data.get("blockHash"),
         )
