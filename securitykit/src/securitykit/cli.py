@@ -59,5 +59,43 @@ def scan(
         raise typer.Exit(1)
 
 
+@app.command()
+def report(
+    rpc_url: str = typer.Option(..., help="Node RPC endpoint to audit"),
+    output: str = typer.Option("report.md", help="Output file"),
+) -> None:
+    """Generate a markdown security audit report."""
+    findings = run_audit(rpc_url)
+
+    lines = [
+        "# SecurityKit Audit Report\n",
+        f"**Target**: `{rpc_url}`\n",
+        "| Rule | Check | Severity | Status |",
+        "|------|-------|----------|--------|",
+    ]
+    for f in findings:
+        icon = _STATUS_ICON[f.status]
+        lines.append(
+            f"| {f.rule_id} | {f.title} | {f.severity.value} "
+            f"| {icon} {f.status.value} |"
+        )
+
+    passed = sum(1 for f in findings if f.status == Status.PASS)
+    failed = sum(1 for f in findings if f.status == Status.FAIL)
+    lines.append(f"\n**Results**: {passed} passed, {failed} failed\n")
+
+    # Remediation section
+    failures = [f for f in findings if f.status == Status.FAIL]
+    if failures:
+        lines.append("## Remediation Required\n")
+        for f in failures:
+            lines.append(f"- **{f.rule_id}**: {f.remediation}")
+
+    text = "\n".join(lines) + "\n"
+    with open(output, "w") as fh:
+        fh.write(text)
+    typer.echo(f"Report written to {output}")
+
+
 if __name__ == "__main__":
     app()
