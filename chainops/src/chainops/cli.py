@@ -202,6 +202,22 @@ def estimate(
         console.print("\n[green]✓[/green] Spot instances enabled (70% savings)")
 
 
+@app.command()
+def chains() -> None:
+    """List supported blockchains."""
+    table = Table(title="Supported Chains")
+    table.add_column("Chain", style="cyan")
+    table.add_column("Instance Type", style="green")
+    table.add_column("Storage", style="yellow")
+    for name, defaults in CHAIN_DEFAULTS.items():
+        table.add_row(
+            name,
+            defaults["instance_type"],
+            f"{defaults['storage_size']} GB",
+        )
+    console.print(table)
+
+
 @app.command("list")
 def list_deployments() -> None:
     """List all tracked deployments."""
