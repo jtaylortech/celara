@@ -7,7 +7,10 @@ import { useState } from "react";
 const nav = [
   {
     title: "Getting Started",
-    links: [{ href: "/docs", label: "Overview" }],
+    links: [
+      { href: "/docs", label: "Overview" },
+      { href: "/docs/api", label: "REST API" },
+    ],
   },
   {
     title: "ChainETL",
