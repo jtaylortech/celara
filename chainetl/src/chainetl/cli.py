@@ -215,5 +215,18 @@ def chains() -> None:
         typer.echo(f"  • {name:12s} {rpc_url}")
 
 
+@app.command()
+def serve(
+    host: str = typer.Option("0.0.0.0", help="Bind host"),
+    port: int = typer.Option(8000, help="Port"),
+) -> None:
+    """Start the ChainETL REST API server."""
+    import uvicorn
+
+    typer.echo(f"Starting ChainETL API on {host}:{port}")
+    typer.echo(f"Docs at http://localhost:{port}/docs")
+    uvicorn.run("chainetl.api:app", host=host, port=port)
+
+
 if __name__ == "__main__":
     app()
