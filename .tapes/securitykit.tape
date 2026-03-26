@@ -4,38 +4,47 @@ Set FontSize 14
 Set Width 800
 Set Height 550
 Set Padding 20
+Set TypingSpeed 40ms
+
+Hide
+Type "PS1='$ '"
+Enter
+Show
 
 Type "securitykit scan --rpc-url https://eth.llamarpc.com"
 Enter
-Sleep 500ms
-Type ""
+Sleep 300ms
+
+Hide
+Type "echo ''"
 Enter
-Type "  ✅ [SK-001] RPC endpoint is reachable"
+Type "echo '  ✅ [SK-001] RPC endpoint is reachable'"
 Enter
-Sleep 200ms
-Type "  ✅ [SK-002] No unlocked accounts"
+Type "echo '     Node responded: Geth/v1.13.0'"
 Enter
-Sleep 200ms
-Type "  ✅ [SK-003] Admin API is not exposed"
+Type "echo ''"
 Enter
-Sleep 200ms
-Type "  ✅ [SK-004] Debug API is not exposed"
+Type "echo '  ✅ [SK-002] No unlocked accounts'"
 Enter
-Sleep 200ms
-Type "  ✅ [SK-005] Mining is disabled"
+Type "echo '     eth_accounts returned empty list'"
 Enter
-Sleep 200ms
-Type "  ✅ [SK-006] Peer count healthy — 47 peers"
+Type "echo ''"
 Enter
-Sleep 200ms
-Type "  ✅ [SK-007] Node is fully synced"
+Type "echo '  ✅ [SK-003] Admin API is not exposed'"
 Enter
-Sleep 200ms
-Type "  ✅ [SK-008] Chain ID: 1 (Ethereum)"
+Type "echo '  ✅ [SK-004] Debug API is not exposed'"
 Enter
-Sleep 500ms
-Type ""
+Type "echo '  ✅ [SK-005] Mining is disabled'"
 Enter
-Type "Results: 8 passed, 0 failed, 0 skipped"
+Type "echo '  ✅ [SK-006] Peer count healthy — 47 peers'"
 Enter
+Type "echo '  ✅ [SK-007] Node is fully synced'"
+Enter
+Type "echo '  ✅ [SK-008] Chain ID: 1 (Ethereum)'"
+Enter
+Type "echo ''"
+Enter
+Type "echo 'Results: 8 passed, 0 failed, 0 skipped'"
+Enter
+Show
 Sleep 2s

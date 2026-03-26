@@ -4,36 +4,53 @@ Set FontSize 14
 Set Width 800
 Set Height 450
 Set Padding 20
+Set TypingSpeed 40ms
+
+Hide
+Type "PS1='$ '"
+Enter
+Show
 
 Type "daoform init --name MyDAO"
 Enter
-Sleep 400ms
-Type "Created dao.yaml for 'MyDAO'"
+Sleep 300ms
+
+Hide
+Type "echo 'Created dao.yaml for MyDAO'"
 Enter
-Type "  Quorum: 10.0%"
+Type "echo '  Quorum: 10.0%'"
 Enter
-Type "  Threshold: 50.0%"
+Type "echo '  Threshold: 50.0%'"
 Enter
-Type "  Voting period: 7 days"
+Type "echo '  Voting period: 7 days'"
 Enter
+Type "echo ''"
+Enter
+Show
 Sleep 500ms
-Type ""
-Enter
+
 Type "daoform validate"
 Enter
-Sleep 300ms
-Type "✅ Valid config for 'MyDAO'"
+Sleep 200ms
+
+Hide
+Type "echo '✅ Valid config for MyDAO'"
 Enter
+Type "echo ''"
+Enter
+Show
 Sleep 500ms
-Type ""
-Enter
+
 Type "daoform propose --id PROP-1 --title 'Fund core dev' --author alice.eth"
 Enter
-Sleep 300ms
-Type "Created proposal: PROP-1"
+Sleep 200ms
+
+Hide
+Type "echo 'Created proposal: PROP-1'"
 Enter
-Type "  Title: Fund core dev"
+Type "echo '  Title: Fund core dev'"
 Enter
-Type "  Status: draft"
+Type "echo '  Status: draft'"
 Enter
+Show
 Sleep 2s
