@@ -4,7 +4,7 @@ import typer
 import yaml
 
 from daoform.engine import GovernanceEngine
-from daoform.models import DAOConfig, Proposal, ProposalStatus
+from daoform.models import DAOConfig, Proposal
 
 app = typer.Typer(help="DAOForm - Governance-as-Code for DAOs")
 

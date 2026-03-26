@@ -1,6 +1,6 @@
 """Tests for exporters."""
 
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 from chainwatch.exporters.ethereum import EthereumExporter
 from chainwatch.exporters.evm import EVMExporter

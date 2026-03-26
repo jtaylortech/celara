@@ -1,12 +1,12 @@
 """Governance data models."""
 
 from datetime import datetime
-from enum import Enum
+from enum import StrEnum
 
 from pydantic import BaseModel, Field
 
 
-class ProposalStatus(str, Enum):
+class ProposalStatus(StrEnum):
     DRAFT = "draft"
     ACTIVE = "active"
     PASSED = "passed"
@@ -14,7 +14,7 @@ class ProposalStatus(str, Enum):
     EXECUTED = "executed"
 
 
-class VoteChoice(str, Enum):
+class VoteChoice(StrEnum):
     FOR = "for"
     AGAINST = "against"
     ABSTAIN = "abstain"

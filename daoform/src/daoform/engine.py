@@ -1,6 +1,6 @@
 """Governance engine — proposal lifecycle and vote tallying."""
 
-from daoform.models import DAOConfig, Proposal, ProposalStatus, Vote, VoteChoice
+from daoform.models import DAOConfig, Proposal, ProposalStatus, Vote
 
 
 class GovernanceEngine:

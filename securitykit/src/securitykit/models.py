@@ -5,10 +5,10 @@ and chain-agnostic where possible.
 """
 
 from dataclasses import dataclass
-from enum import Enum
+from enum import StrEnum
 
 
-class Severity(str, Enum):
+class Severity(StrEnum):
     CRITICAL = "critical"
     HIGH = "high"
     MEDIUM = "medium"
@@ -16,7 +16,7 @@ class Severity(str, Enum):
     INFO = "info"
 
 
-class Status(str, Enum):
+class Status(StrEnum):
     PASS = "pass"
     FAIL = "fail"
     SKIP = "skip"
