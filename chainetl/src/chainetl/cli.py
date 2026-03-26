@@ -12,6 +12,7 @@ from chainetl.extractors.base import BaseExtractor
 from chainetl.extractors.base_l2 import BaseL2Extractor
 from chainetl.extractors.ethereum import EthereumExtractor
 from chainetl.extractors.polygon import PolygonExtractor
+from chainetl.loaders.base import BaseLoader
 from chainetl.loaders.postgres import PostgresLoader
 from chainetl.models.checkpoint import Checkpoint
 
@@ -77,14 +78,19 @@ def sync(
 
     extractor = _get_extractor(chain)
 
-    if destination != "postgres":
+    # Initialize loader
+    if destination == "postgres":
+        loader: BaseLoader = PostgresLoader(settings.database_url)
+    elif destination == "jsonl":
+        from chainetl.loaders.jsonl import JsonLinesLoader
+        loader = JsonLinesLoader()
+    else:
         typer.echo(
-            f"❌ Unsupported destination: '{destination}'. Supported: postgres",
+            f"❌ Unsupported destination: '{destination}'. "
+            f"Supported: postgres, jsonl",
             err=True,
         )
         raise typer.Exit(1)
-
-    loader = PostgresLoader(settings.database_url)
 
     # Resolve start block
     if resume:
