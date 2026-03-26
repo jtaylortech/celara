@@ -43,6 +43,26 @@ const products = [
   },
 ];
 
+function ProductCard({ product }: { product: typeof products[number] }) {
+  return (
+    <Link
+      href={product.href}
+      className="group relative overflow-hidden rounded-xl border border-[var(--border)] hover:border-[var(--accent)] transition-all p-6"
+    >
+      <div className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${product.gradient}`} />
+      <div className="flex items-center justify-between mb-3">
+        <h3 className="text-lg font-bold">{product.name}</h3>
+        <span className="text-xs text-[var(--muted)] opacity-0 group-hover:opacity-100 transition-opacity">→</span>
+      </div>
+      <p className="text-xs text-[var(--muted)] uppercase tracking-wide mb-2">{product.desc}</p>
+      <p className="text-sm opacity-80 leading-relaxed mb-4">{product.detail}</p>
+      <code className="block text-xs text-emerald-400 bg-emerald-400/5 border border-emerald-400/10 px-3 py-2 rounded-lg font-mono">
+        $ {product.cmd}
+      </code>
+    </Link>
+  );
+}
+
 export default function Home() {
   return (
     <main className="min-h-screen">
@@ -105,28 +125,14 @@ export default function Home() {
           <h2 className="text-sm font-medium text-[var(--muted)] uppercase tracking-wide mb-10">
             The Stack
           </h2>
-          <div className="grid md:grid-cols-2 gap-4">
-            {products.map((product) => (
-              <Link
-                key={product.name}
-                href={product.href}
-                className="group relative overflow-hidden rounded-xl border border-[var(--border)] hover:border-[var(--accent)] transition-all p-6"
-              >
-                {/* Gradient accent bar */}
-                <div className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${product.gradient}`} />
-
-                <div className="flex items-center justify-between mb-3">
-                  <h3 className="text-lg font-bold">{product.name}</h3>
-                  <span className="text-xs text-[var(--muted)] opacity-0 group-hover:opacity-100 transition-opacity">
-                    View →
-                  </span>
-                </div>
-                <p className="text-xs text-[var(--muted)] uppercase tracking-wide mb-2">{product.desc}</p>
-                <p className="text-sm opacity-80 leading-relaxed mb-4">{product.detail}</p>
-                <code className="block text-xs text-emerald-400 bg-emerald-400/5 border border-emerald-400/10 px-3 py-2 rounded-lg font-mono">
-                  $ {product.cmd}
-                </code>
-              </Link>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {products.slice(0, 3).map((product) => (
+              <ProductCard key={product.name} product={product} />
+            ))}
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 md:max-w-[66.666%] md:mx-auto">
+            {products.slice(3).map((product) => (
+              <ProductCard key={product.name} product={product} />
             ))}
           </div>
         </div>
