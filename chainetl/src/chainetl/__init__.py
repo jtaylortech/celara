@@ -6,7 +6,7 @@ import structlog
 
 from chainetl.config import settings
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 
 # Configure structlog with log level from settings
 structlog.configure(

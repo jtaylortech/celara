@@ -1,7 +1,7 @@
 [project]
 name = "chainetl"
-version = "0.1.0"
-description = "Production-grade blockchain data pipelines for extracting blockchain data to data warehouses"
+version = "0.2.0"
+description = "Production-grade blockchain data pipelines for EVM chains"
 readme = "README.md"
 license = {text = "Apache-2.0"}
 authors = [
@@ -13,13 +13,13 @@ maintainers = [
 keywords = [
     "blockchain",
     "ethereum",
+    "polygon",
+    "arbitrum",
     "base",
     "etl",
     "data-pipeline",
-    "data-warehouse",
     "web3",
-    "crypto",
-    "analytics",
+    "evm",
 ]
 classifiers = [
     "Development Status :: 4 - Beta",
