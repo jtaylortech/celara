@@ -14,22 +14,8 @@ export default function ChainETL() {
       gradient="from-purple-500 to-pink-500"
       description="Extract blocks, transactions, logs, and token transfers from any EVM chain. Load into PostgreSQL for analytics or JSON Lines for local processing with jq, DuckDB, or pandas. Resumable syncs, reorg detection, and ERC-20/721 token parsing."
       installCmd="pip install chainetl"
-      heroCode={`# Sync 100 Ethereum blocks to JSON Lines
-$ chainetl sync --chain ethereum --start-block 18000000 --count 100 --destination jsonl
-
-Syncing blocks 18000000 to 18000099 (100 blocks)
-Extracting blocks ━━━━━━━━━━━━━━━━━━━━ 100/100
-Loaded 100 blocks
-Checkpoint saved at block 18000099
-
-# Analyze with jq
-$ cat output/ethereum_blocks.jsonl | jq '.number'
-18000000
-18000001
-...
-
-# Resume later — picks up at 18000100
-$ chainetl sync --chain ethereum --resume --count 1000`}
+      screenshotSrc="/screenshots/chainetl-sync.png"
+      screenshotAlt="ChainETL syncing Ethereum blocks to JSON Lines"
       stats={[
         { label: "EVM Chains", value: "4" },
         { label: "Tests", value: "66" },

@@ -14,26 +14,8 @@ export default function DAOForm() {
       gradient="from-teal-400 to-blue-500"
       description="Define your DAO's governance in YAML. Create proposals, cast weighted votes, and resolve outcomes with configurable quorum and threshold rules. Version-controlled, auditable, reproducible. Python SDK for building governance UIs."
       installCmd="pip install daoform"
-      heroCode={`$ daoform init --name "MyDAO"
-Created dao.yaml for 'MyDAO'
-  Quorum: 10.0%
-  Threshold: 50.0%
-  Voting period: 7 days
-
-$ cat dao.yaml
-name: MyDAO
-quorum: 0.1
-threshold: 0.5
-voting_period_days: 7
-timelock_days: 2
-
-$ daoform validate
-✅ Valid config for 'MyDAO'
-
-$ daoform propose --id PROP-1 --title "Fund core development" --author alice.eth
-Created proposal: PROP-1
-  Title: Fund core development
-  Status: draft`}
+      screenshotSrc="/screenshots/daoform-init.png"
+      screenshotAlt="DAOForm initializing governance config"
       stats={[
         { label: "Tests", value: "18" },
         { label: "Vote Types", value: "3" },

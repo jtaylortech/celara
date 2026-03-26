@@ -11,7 +11,8 @@ interface ProductPageProps {
   gradient: string;
   description: string;
   installCmd: string;
-  heroCode: string;
+  screenshotSrc: string;
+  screenshotAlt: string;
   features: Feature[];
   stats: { label: string; value: string }[];
   chains?: string[];
@@ -25,7 +26,8 @@ export function ProductPage({
   gradient,
   description,
   installCmd,
-  heroCode,
+  screenshotSrc,
+  screenshotAlt,
   features,
   stats,
   chains,
@@ -73,13 +75,12 @@ export function ProductPage({
         </div>
       </section>
 
-      {/* Code example */}
+      {/* Screenshot */}
       <section className="px-6 py-16 border-t border-[var(--border)]">
         <div className="max-w-3xl mx-auto">
           <h2 className="text-sm font-medium text-[var(--muted)] uppercase tracking-wide mb-6">See it in action</h2>
-          <pre className="p-6 bg-[var(--surface)] border border-[var(--border)] rounded-xl text-sm overflow-x-auto leading-relaxed">
-            <code className="text-emerald-400">{heroCode}</code>
-          </pre>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={screenshotSrc} alt={screenshotAlt} className="w-full rounded-xl" />
         </div>
       </section>
 

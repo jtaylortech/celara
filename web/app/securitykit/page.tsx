@@ -14,33 +14,8 @@ export default function SecurityKit() {
       gradient="from-pink-500 to-amber-500"
       description="Scan your blockchain nodes for security misconfigurations via JSON-RPC. No SSH, no agents. 8 checks covering unlocked accounts, exposed admin APIs, peer connectivity, and sync status. Markdown reports for compliance. JSON output for CI/CD."
       installCmd="pip install securitykit"
-      heroCode={`$ securitykit scan --rpc-url https://eth.llamarpc.com
-
-  ✅ [SK-001] RPC endpoint is reachable
-     Node responded: Geth/v1.13.0
-
-  ✅ [SK-002] No unlocked accounts
-     eth_accounts returned empty list
-
-  ✅ [SK-003] Admin API is not exposed
-     admin_nodeInfo is not accessible
-
-  ✅ [SK-004] Debug API is not exposed
-     debug namespace is not accessible
-
-  ✅ [SK-005] Mining is disabled
-     eth_mining returned false
-
-  ✅ [SK-006] Peer count healthy
-     47 peers connected
-
-  ✅ [SK-007] Node is fully synced
-     eth_syncing returned false (synced)
-
-  ✅ [SK-008] Chain ID: 1 (Ethereum)
-     eth_chainId returned 1
-
-Results: 8 passed, 0 failed, 0 skipped`}
+      screenshotSrc="/screenshots/securitykit-scan.png"
+      screenshotAlt="SecurityKit scanning a node for vulnerabilities"
       stats={[
         { label: "Security Checks", value: "8" },
         { label: "Tests", value: "21" },

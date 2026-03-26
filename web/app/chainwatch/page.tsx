@@ -14,22 +14,8 @@ export default function ChainWatch() {
       gradient="from-blue-500 to-purple-500"
       description="Prometheus metrics exporter for blockchain nodes. Monitor sync status, peer count, gas prices, and client version across multiple EVM chains. All metrics labeled by chain. Grafana dashboard with 7 panels included."
       installCmd="pip install chainwatch"
-      heroCode={`# Start exporter
-$ chainwatch exporter --chain ethereum --port 9100
-Starting ethereum exporter on port 9100
-Metrics at http://localhost:9100/metrics
-
-# curl the metrics
-$ curl -s localhost:9100/metrics | grep chainwatch
-chainwatch_sync_status{chain="ethereum"} 1.0
-chainwatch_current_block{chain="ethereum"} 19234567.0
-chainwatch_peer_count{chain="ethereum"} 47.0
-chainwatch_gas_price_gwei{chain="ethereum"} 12.34
-
-# One-shot health check
-$ chainwatch status --chain polygon
-Checking polygon node at https://polygon-rpc.com...
-Node Status: OK`}
+      screenshotSrc="/screenshots/chainwatch-metrics.png"
+      screenshotAlt="ChainWatch Prometheus metrics output"
       stats={[
         { label: "EVM Chains", value: "4" },
         { label: "Metrics", value: "6" },

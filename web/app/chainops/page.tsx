@@ -14,25 +14,8 @@ export default function ChainOps() {
       gradient="from-yellow-400 to-amber-500"
       description="Deploy blockchain validators with a single command. ChainOps generates Terraform configurations for AWS with chain-specific defaults — instance types, storage, security groups, and monitoring. Cost estimation before you deploy."
       installCmd="pip install chainops"
-      heroCode={`# Initialize Ethereum validator
-$ chainops init ethereum --network mainnet --region us-east-1
-✓ Configuration saved to chainops.yaml
-
-# Estimate costs
-$ chainops estimate
-┌─────────────────────────────┬──────────┐
-│ Component                   │     Cost │
-├─────────────────────────────┼──────────┤
-│ EC2 Instance (t3.xlarge)    │  $120.00 │
-│ EBS Storage (2TB gp3)       │  $160.00 │
-│ Data Transfer (~500GB)      │   $45.00 │
-│ CloudWatch                  │   $10.00 │
-│ Total                       │  $335.00 │
-└─────────────────────────────┴──────────┘
-
-# Deploy
-$ chainops deploy --dry-run   # Preview first
-$ chainops deploy              # Ship it`}
+      screenshotSrc="/screenshots/chainops-deploy.png"
+      screenshotAlt="ChainOps deploying an Ethereum validator"
       stats={[
         { label: "Chains", value: "2" },
         { label: "Tests", value: "14" },
