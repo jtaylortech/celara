@@ -3,57 +3,74 @@ import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Documentation | Celara",
-  description: "Getting started guides and API reference for all Celara tools.",
+  description: "Complete documentation for all Celara tools. Quick start guides, CLI reference, architecture, and API docs.",
 };
 
-const docs = [
+const products = [
   {
-    product: "ChainETL",
+    name: "ChainETL",
     href: "/chainetl",
-    sections: [
-      { title: "Quick Start", content: "pip install chainetl && chainetl sync --chain ethereum --start-block 18000000 --count 10" },
-      { title: "Supported Chains", content: "Ethereum, Base, Polygon, Arbitrum — any EVM-compatible chain." },
-      { title: "Output Formats", content: "PostgreSQL (--destination postgres) or JSON Lines (--destination jsonl) for local analysis with jq, DuckDB, or pandas." },
-      { title: "Resume Syncs", content: "chainetl sync --chain ethereum --resume --count 1000 — picks up from last checkpoint automatically." },
-      { title: "Adding a Chain", content: "Create a 3-line Python file inheriting from EVMExtractor, add RPC URL to config, register in CLI." },
+    desc: "Blockchain data pipelines",
+    gradient: "from-purple-500 to-pink-500",
+    highlights: [
+      "Extract blocks, transactions, logs, token transfers from 4 EVM chains",
+      "Output to PostgreSQL or JSON Lines",
+      "Resumable syncs, reorg detection, batch processing",
+      "Python SDK with Pydantic models",
     ],
+    cmd: "chainetl sync --chain ethereum --start-block 18000000 --count 10",
   },
   {
-    product: "ChainWatch",
-    href: "/chainwatch",
-    sections: [
-      { title: "Quick Start", content: "pip install chainwatch && chainwatch exporter --chain ethereum --port 9100" },
-      { title: "Metrics", content: "chainwatch_sync_status, chainwatch_current_block, chainwatch_peer_count, chainwatch_gas_price_gwei — all labeled by chain." },
-      { title: "Grafana", content: "Import dashboards/node-health.json into Grafana. Chain selector variable included." },
-    ],
-  },
-  {
-    product: "ChainOps",
+    name: "ChainOps",
     href: "/chainops",
-    sections: [
-      { title: "Quick Start", content: "pip install chainops && chainops init ethereum --network mainnet && chainops deploy --dry-run" },
-      { title: "Supported Chains", content: "Ethereum (t3.xlarge, 2TB) and Solana (r6i.2xlarge, 2TB) with AWS Terraform templates." },
-      { title: "Cost Estimation", content: "chainops estimate — shows monthly cost breakdown before you deploy." },
+    desc: "Infrastructure-as-Code for validators",
+    gradient: "from-yellow-400 to-amber-500",
+    highlights: [
+      "One-command Terraform deployments to AWS",
+      "Ethereum and Solana validator templates",
+      "Cost estimation before deploy",
+      "State tracking and destroy commands",
     ],
+    cmd: "chainops init ethereum --network mainnet && chainops deploy",
   },
   {
-    product: "SecurityKit",
+    name: "ChainWatch",
+    href: "/chainwatch",
+    desc: "Observability for decentralized systems",
+    gradient: "from-blue-500 to-purple-500",
+    highlights: [
+      "Prometheus metrics exporter for EVM nodes",
+      "Sync status, peer count, gas price, client version",
+      "Grafana dashboard included (7 panels)",
+      "Multi-chain monitoring with chain labels",
+    ],
+    cmd: "chainwatch exporter --chain ethereum --port 9100",
+  },
+  {
+    name: "SecurityKit",
     href: "/securitykit",
-    sections: [
-      { title: "Quick Start", content: "pip install securitykit && securitykit scan --rpc-url https://eth.llamarpc.com" },
-      { title: "Checks", content: "8 checks: RPC reachability, unlocked accounts, admin API, debug API, mining status, peer count, sync status, chain ID." },
-      { title: "Reports", content: "securitykit report --rpc-url <url> --output report.md — generates a markdown audit report." },
-      { title: "CI Integration", content: "Exit code 1 on failures. Use --output json for machine-readable results." },
+    desc: "Automated security for node operators",
+    gradient: "from-pink-500 to-amber-500",
+    highlights: [
+      "8 RPC-based security checks (no SSH required)",
+      "Unlocked accounts, admin API, debug API detection",
+      "Markdown audit reports for compliance",
+      "JSON output + exit codes for CI/CD",
     ],
+    cmd: "securitykit scan --rpc-url https://eth.llamarpc.com",
   },
   {
-    product: "DAOForm",
+    name: "DAOForm",
     href: "/daoform",
-    sections: [
-      { title: "Quick Start", content: "pip install daoform && daoform init --name MyDAO && daoform validate" },
-      { title: "Governance Config", content: "YAML-based: set quorum (10%), threshold (50%), voting period (7 days), timelock (2 days)." },
-      { title: "Python SDK", content: "GovernanceEngine class: create_proposal(), cast_vote(), tally(), resolve(). Full Pydantic models." },
+    desc: "Governance-as-Code",
+    gradient: "from-teal-400 to-blue-500",
+    highlights: [
+      "YAML-based DAO governance configuration",
+      "Proposal lifecycle with weighted voting",
+      "Quorum and threshold resolution",
+      "YAML persistence + Python SDK",
     ],
+    cmd: "daoform init --name MyDAO && daoform validate",
   },
 ];
 
@@ -65,38 +82,67 @@ export default function Docs() {
           ← Home
         </Link>
 
-        <div className="mt-8 mb-16">
+        <div className="mt-8 mb-6">
           <h1 className="text-4xl md:text-5xl font-bold tracking-tight">Documentation</h1>
           <p className="mt-4 text-lg text-[var(--muted)]">
-            Getting started with every Celara tool.
+            Complete guides for every Celara tool. Click a product for full documentation including architecture, CLI reference, and API docs.
           </p>
         </div>
 
-        <div className="space-y-16">
-          {docs.map((doc) => (
-            <section key={doc.product} id={doc.product.toLowerCase()}>
-              <Link href={doc.href} className="group">
-                <h2 className="text-2xl font-bold mb-6 group-hover:text-[var(--accent)] transition-colors">
-                  {doc.product} <span className="text-[var(--muted)] text-lg">→</span>
+        {/* Install all */}
+        <pre className="p-4 bg-[var(--surface)] border border-[var(--border)] rounded-lg text-sm overflow-x-auto mb-16">
+          <code className="text-emerald-400">$ pip install chainetl chainwatch chainops securitykit daoform</code>
+        </pre>
+
+        <div className="space-y-12">
+          {products.map((product) => (
+            <Link
+              key={product.name}
+              href={product.href}
+              className="group block p-6 -mx-6 rounded-xl border border-transparent hover:border-[var(--border)] hover:bg-[var(--surface)] transition-all"
+            >
+              <div className="flex items-center gap-3 mb-3">
+                <div className={`w-2 h-2 rounded-full bg-gradient-to-r ${product.gradient}`} />
+                <h2 className="text-xl font-bold group-hover:text-[var(--accent)] transition-colors">
+                  {product.name}
                 </h2>
-              </Link>
-              <div className="space-y-6">
-                {doc.sections.map((section) => (
-                  <div key={section.title}>
-                    <h3 className="text-sm font-semibold text-[var(--text)] mb-2">{section.title}</h3>
-                    {section.content.startsWith("pip ") || section.content.startsWith("chainetl") || section.content.startsWith("chainwatch") || section.content.startsWith("chainops") || section.content.startsWith("securitykit") || section.content.startsWith("daoform") ? (
-                      <pre className="p-3 bg-[var(--surface)] border border-[var(--border)] rounded-lg text-sm overflow-x-auto">
-                        <code className="text-emerald-400">$ {section.content}</code>
-                      </pre>
-                    ) : (
-                      <p className="text-sm text-[var(--muted)] leading-relaxed">{section.content}</p>
-                    )}
-                  </div>
-                ))}
+                <span className="text-sm text-[var(--muted)]">{product.desc}</span>
+                <span className="ml-auto text-[var(--muted)] opacity-0 group-hover:opacity-100 transition-opacity">→</span>
               </div>
-            </section>
+
+              <ul className="space-y-1 mb-4">
+                {product.highlights.map((h) => (
+                  <li key={h} className="text-sm text-[var(--muted)] flex gap-2">
+                    <span className="text-emerald-400/60 shrink-0">✓</span> {h}
+                  </li>
+                ))}
+              </ul>
+
+              <code className="text-xs text-emerald-400/70 bg-emerald-400/5 px-2 py-1 rounded">
+                $ {product.cmd}
+              </code>
+            </Link>
           ))}
         </div>
+
+        {/* Global info */}
+        <section className="mt-20 pt-12 border-t border-[var(--border)]">
+          <h2 className="text-xl font-bold mb-6">Common Patterns</h2>
+          <div className="space-y-6 text-sm text-[var(--muted)] leading-relaxed">
+            <div>
+              <h3 className="font-semibold text-[var(--text)] mb-2">All tools use the same stack</h3>
+              <p>Python 3.11+, Typer CLI, Pydantic models, structlog logging, ruff linting, mypy strict type checking, pytest with coverage. Install any tool with pip or uv.</p>
+            </div>
+            <div>
+              <h3 className="font-semibold text-[var(--text)] mb-2">Configuration via environment variables</h3>
+              <p>Every tool reads from environment variables or a .env file. Copy .env.example to .env in any product directory to get started. RPC URLs, database connections, and ports are all configurable.</p>
+            </div>
+            <div>
+              <h3 className="font-semibold text-[var(--text)] mb-2">Adding EVM chains</h3>
+              <p>ChainETL, ChainWatch, and SecurityKit all work with any EVM-compatible chain. Adding a new chain is a 3-line Python file — inherit from the base class, set the chain name, register the RPC URL.</p>
+            </div>
+          </div>
+        </section>
       </div>
     </main>
   );
