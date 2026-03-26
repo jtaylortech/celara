@@ -101,33 +101,31 @@ export default function Home() {
 
       {/* Products */}
       <section className="px-6 py-20 border-t border-[var(--border)]">
-        <div className="max-w-3xl mx-auto">
+        <div className="max-w-4xl mx-auto">
           <h2 className="text-sm font-medium text-[var(--muted)] uppercase tracking-wide mb-10">
             The Stack
           </h2>
-          <div className="space-y-8">
+          <div className="grid md:grid-cols-2 gap-4">
             {products.map((product) => (
               <Link
                 key={product.name}
                 href={product.href}
-                className="group block p-6 -mx-6 rounded-xl hover:bg-[var(--surface)] transition-colors"
+                className="group relative overflow-hidden rounded-xl border border-[var(--border)] hover:border-[var(--accent)] transition-all p-6"
               >
-                <div className="flex items-start gap-4">
-                  <div className={`w-2 h-2 rounded-full bg-gradient-to-r ${product.gradient} mt-2 shrink-0`} />
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-3 mb-1">
-                      <span className="text-lg font-semibold">{product.name}</span>
-                      <span className="text-xs text-[var(--muted)]">{product.desc}</span>
-                    </div>
-                    <p className="text-sm text-[var(--muted)] mb-3">{product.detail}</p>
-                    <code className="text-xs text-emerald-400/80 bg-emerald-400/5 px-2 py-1 rounded">
-                      $ {product.cmd}
-                    </code>
-                  </div>
-                  <span className="text-[var(--muted)] opacity-0 group-hover:opacity-100 transition-opacity text-sm">
-                    →
+                {/* Gradient accent bar */}
+                <div className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${product.gradient}`} />
+
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-lg font-bold">{product.name}</h3>
+                  <span className="text-xs text-[var(--muted)] opacity-0 group-hover:opacity-100 transition-opacity">
+                    View →
                   </span>
                 </div>
+                <p className="text-xs text-[var(--muted)] uppercase tracking-wide mb-2">{product.desc}</p>
+                <p className="text-sm text-[var(--muted)] leading-relaxed mb-4">{product.detail}</p>
+                <code className="block text-xs text-emerald-400 bg-emerald-400/5 border border-emerald-400/10 px-3 py-2 rounded-lg font-mono">
+                  $ {product.cmd}
+                </code>
               </Link>
             ))}
           </div>
@@ -136,18 +134,19 @@ export default function Home() {
 
       {/* Why Celara */}
       <section className="px-6 py-20 border-t border-[var(--border)]">
-        <div className="max-w-3xl mx-auto">
+        <div className="max-w-4xl mx-auto">
           <h2 className="text-sm font-medium text-[var(--muted)] uppercase tracking-wide mb-10">
             Why Celara
           </h2>
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-3 gap-4">
             {[
-              { title: "Open Source", body: "Apache 2.0. Every tool, every line. No vendor lock-in." },
-              { title: "Composable", body: "Each tool works standalone or as part of the suite. Start with one, adopt more as you grow." },
-              { title: "Production-Grade", body: "Type-safe Python. 128+ tests. CI on every push. Built by infrastructure engineers." },
+              { icon: "🔓", title: "Open Source", body: "Apache 2.0. Every tool, every line. Fork it, extend it, self-host it. No vendor lock-in, ever." },
+              { icon: "🧩", title: "Composable", body: "Each tool works standalone. Use ChainETL without ChainOps. Adopt one, then add more as your stack grows." },
+              { icon: "🏗️", title: "Production-Grade", body: "128+ tests across 5 products. Type-safe Python with mypy strict. CI on every push. Built to ship." },
             ].map((item) => (
-              <div key={item.title}>
-                <h3 className="font-semibold mb-2">{item.title}</h3>
+              <div key={item.title} className="rounded-xl border border-[var(--border)] p-6">
+                <div className="text-2xl mb-3">{item.icon}</div>
+                <h3 className="font-bold mb-2">{item.title}</h3>
                 <p className="text-sm text-[var(--muted)] leading-relaxed">{item.body}</p>
               </div>
             ))}
