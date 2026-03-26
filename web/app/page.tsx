@@ -11,29 +11,29 @@ const products = [
   {
     name: "ChainOps",
     desc: "Infrastructure-as-Code for validators",
-    status: "building" as const,
+    status: "live" as const,
     href: "/chainops",
     gradient: "from-yellow-400 to-amber-500",
   },
   {
     name: "ChainWatch",
     desc: "Observability for decentralized systems",
-    status: "building" as const,
-    href: null,
+    status: "live" as const,
+    href: "/chainwatch",
     gradient: "from-blue-500 to-purple-500",
   },
   {
     name: "SecurityKit",
     desc: "Automated security for node operators",
-    status: "soon" as const,
-    href: null,
+    status: "live" as const,
+    href: "/securitykit",
     gradient: "from-pink-500 to-amber-500",
   },
   {
     name: "DAOForm",
     desc: "Governance-as-Code",
-    status: "soon" as const,
-    href: null,
+    status: "live" as const,
+    href: "/daoform",
     gradient: "from-teal-400 to-blue-500",
   },
 ];
@@ -111,7 +111,7 @@ export default function Home() {
             href="https://github.com/jtaylortech/celara-homepage/tree/main/chainetl"
             className="text-[var(--accent)] hover:underline underline-offset-4"
           >
-            ChainETL Docs
+            Docs
           </Link>
         </div>
 
