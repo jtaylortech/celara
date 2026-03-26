@@ -1,0 +1,84 @@
+{
+  "annotations": { "list": [] },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "title": "Sync Status",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 0 },
+      "targets": [{ "expr": "chainwatch_sync_status{chain=\"$chain\"}", "legendFormat": "Synced" }],
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [
+            { "options": { "0": { "text": "Syncing", "color": "orange" }, "1": { "text": "Synced", "color": "green" } }, "type": "value" }
+          ]
+        }
+      }
+    },
+    {
+      "title": "Current Block",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 0 },
+      "targets": [{ "expr": "chainwatch_current_block{chain=\"$chain\"}", "legendFormat": "Block" }],
+      "fieldConfig": { "defaults": { "unit": "none" } }
+    },
+    {
+      "title": "Peer Count",
+      "type": "gauge",
+      "gridPos": { "h": 4, "w": 6, "x": 12, "y": 0 },
+      "targets": [{ "expr": "chainwatch_peer_count{chain=\"$chain\"}", "legendFormat": "Peers" }],
+      "fieldConfig": { "defaults": { "min": 0, "max": 100, "thresholds": { "steps": [{ "color": "red", "value": 0 }, { "color": "orange", "value": 3 }, { "color": "green", "value": 10 }] } } }
+    },
+    {
+      "title": "Gas Price (Gwei)",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 6, "x": 18, "y": 0 },
+      "targets": [{ "expr": "chainwatch_gas_price_gwei{chain=\"$chain\"}", "legendFormat": "Gwei" }],
+      "fieldConfig": { "defaults": { "unit": "none", "decimals": 2 } }
+    },
+    {
+      "title": "Block Height Over Time",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 4 },
+      "targets": [{ "expr": "chainwatch_current_block{chain=\"$chain\"}", "legendFormat": "{{chain}}" }]
+    },
+    {
+      "title": "Peer Count Over Time",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 4 },
+      "targets": [{ "expr": "chainwatch_peer_count{chain=\"$chain\"}", "legendFormat": "{{chain}}" }],
+      "fieldConfig": { "defaults": { "min": 0 } }
+    },
+    {
+      "title": "Gas Price Over Time",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 12 },
+      "targets": [{ "expr": "chainwatch_gas_price_gwei{chain=\"$chain\"}", "legendFormat": "{{chain}}" }],
+      "fieldConfig": { "defaults": { "unit": "none", "decimals": 2 } }
+    }
+  ],
+  "schemaVersion": 39,
+  "tags": ["blockchain", "chainwatch", "celara"],
+  "templating": {
+    "list": [
+      {
+        "name": "chain",
+        "type": "custom",
+        "current": { "text": "ethereum", "value": "ethereum" },
+        "options": [
+          { "text": "ethereum", "value": "ethereum", "selected": true },
+          { "text": "base", "value": "base" },
+          { "text": "polygon", "value": "polygon" },
+          { "text": "arbitrum", "value": "arbitrum" }
+        ]
+      }
+    ]
+  },
+  "time": { "from": "now-1h", "to": "now" },
+  "title": "ChainWatch — Node Health",
+  "uid": "chainwatch-node-health"
+}
