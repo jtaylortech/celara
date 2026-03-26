@@ -4,7 +4,7 @@ const products = [
   {
     name: "ChainETL",
     desc: "Blockchain data pipelines",
-    detail: "Extract blocks, transactions, and token transfers from 4 EVM chains. PostgreSQL or JSON Lines output.",
+    detail: "Index any EVM chain into Postgres or JSON Lines. Blocks, transactions, logs, and ERC-20/721 token transfers — with resumable syncs and reorg detection.",
     href: "/chainetl",
     gradient: "from-purple-500 to-pink-500",
     cmd: "chainetl sync --chain ethereum --start-block 18000000 --count 10",
@@ -12,7 +12,7 @@ const products = [
   {
     name: "ChainOps",
     desc: "Infrastructure-as-Code for validators",
-    detail: "Deploy validators with one command. Terraform templates for Ethereum and Solana with cost estimation.",
+    detail: "Go from zero to running validator in one command. Terraform templates with chain-specific defaults, cost estimation, and security hardening baked in.",
     href: "/chainops",
     gradient: "from-yellow-400 to-amber-500",
     cmd: "chainops init ethereum --network mainnet",
@@ -20,7 +20,7 @@ const products = [
   {
     name: "ChainWatch",
     desc: "Observability for decentralized systems",
-    detail: "Prometheus metrics exporter for EVM nodes. Grafana dashboards included. Monitor sync, peers, gas.",
+    detail: "Prometheus-native metrics for your nodes. Sync status, peer health, gas prices — all labeled by chain. Grafana dashboard with 7 panels included.",
     href: "/chainwatch",
     gradient: "from-blue-500 to-purple-500",
     cmd: "chainwatch exporter --chain ethereum --port 9100",
@@ -28,7 +28,7 @@ const products = [
   {
     name: "SecurityKit",
     desc: "Automated security for node operators",
-    detail: "Scan nodes for misconfigurations via RPC. 8 security checks. Markdown reports for audits.",
+    detail: "8 RPC-based security checks — no SSH, no agents. Catches unlocked accounts, exposed admin APIs, and sync issues. CI-ready with JSON output and exit codes.",
     href: "/securitykit",
     gradient: "from-pink-500 to-amber-500",
     cmd: "securitykit scan --rpc-url https://eth.llamarpc.com",
@@ -36,7 +36,7 @@ const products = [
   {
     name: "DAOForm",
     desc: "Governance-as-Code",
-    detail: "Define DAO governance in YAML. Proposals, weighted voting, quorum rules. Version-controlled.",
+    detail: "Your DAO's constitution in a YAML file. Proposals, weighted voting, quorum rules — version-controlled and auditable. Python SDK for building governance UIs.",
     href: "/daoform",
     gradient: "from-teal-400 to-blue-500",
     cmd: "daoform init --name MyDAO",
@@ -122,7 +122,7 @@ export default function Home() {
                   </span>
                 </div>
                 <p className="text-xs text-[var(--muted)] uppercase tracking-wide mb-2">{product.desc}</p>
-                <p className="text-sm text-[var(--muted)] leading-relaxed mb-4">{product.detail}</p>
+                <p className="text-sm opacity-80 leading-relaxed mb-4">{product.detail}</p>
                 <code className="block text-xs text-emerald-400 bg-emerald-400/5 border border-emerald-400/10 px-3 py-2 rounded-lg font-mono">
                   $ {product.cmd}
                 </code>
