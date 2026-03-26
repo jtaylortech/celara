@@ -3,6 +3,9 @@
 from unittest.mock import patch
 
 from securitykit.checks import (
+    check_admin_apis,
+    check_chain_id,
+    check_debug_apis,
     check_mining_enabled,
     check_peer_count,
     check_rpc_exposed,
@@ -87,3 +90,41 @@ def test_sync_in_progress():
     with _mock_rpc({"result": {"currentBlock": "0x100", "highestBlock": "0x200"}}):
         f = check_sync_status("http://test")
     assert f.status == Status.FAIL
+
+
+def test_admin_api_exposed():
+    with _mock_rpc({"result": {"enode": "enode://..."}}):
+        f = check_admin_apis("http://test")
+    assert f.status == Status.FAIL
+    assert f.severity == Severity.CRITICAL
+
+
+def test_admin_api_blocked():
+    with _mock_rpc(None):
+        f = check_admin_apis("http://test")
+    assert f.status == Status.PASS
+
+
+def test_debug_api_exposed():
+    with _mock_rpc({"result": []}):
+        f = check_debug_apis("http://test")
+    assert f.status == Status.FAIL
+
+
+def test_debug_api_blocked():
+    with _mock_rpc(None):
+        f = check_debug_apis("http://test")
+    assert f.status == Status.PASS
+
+
+def test_chain_id():
+    with _mock_rpc({"result": "0x1"}):
+        f = check_chain_id("http://test")
+    assert f.status == Status.PASS
+    assert "Ethereum" in f.title
+
+
+def test_chain_id_skip():
+    with _mock_rpc(None):
+        f = check_chain_id("http://test")
+    assert f.status == Status.SKIP

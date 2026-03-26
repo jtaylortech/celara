@@ -168,11 +168,81 @@ def check_sync_status(rpc_url: str) -> Finding:
     )
 
 
+def check_admin_apis(rpc_url: str) -> Finding:
+    """SK-006: Check if dangerous admin APIs are exposed."""
+    result = _rpc_call(rpc_url, "admin_nodeInfo")
+    if result and "result" in result:
+        return Finding(
+            rule_id="SK-006",
+            title="Admin API is exposed",
+            severity=Severity.CRITICAL,
+            status=Status.FAIL,
+            detail="admin_nodeInfo is accessible",
+            remediation=(
+                "Disable admin API. Never expose admin namespace publicly."
+            ),
+        )
+    return Finding(
+        rule_id="SK-006",
+        title="Admin API is not exposed",
+        severity=Severity.CRITICAL,
+        status=Status.PASS,
+        detail="admin_nodeInfo is not accessible",
+    )
+
+
+def check_debug_apis(rpc_url: str) -> Finding:
+    """SK-007: Check if debug APIs are exposed."""
+    result = _rpc_call(rpc_url, "debug_traceBlockByNumber", ["0x1", {}])
+    if result and "result" in result:
+        return Finding(
+            rule_id="SK-007",
+            title="Debug API is exposed",
+            severity=Severity.HIGH,
+            status=Status.FAIL,
+            detail="debug namespace is accessible",
+            remediation="Disable debug API in production.",
+        )
+    return Finding(
+        rule_id="SK-007",
+        title="Debug API is not exposed",
+        severity=Severity.HIGH,
+        status=Status.PASS,
+        detail="debug namespace is not accessible",
+    )
+
+
+def check_chain_id(rpc_url: str) -> Finding:
+    """SK-008: Verify chain ID matches expected network."""
+    result = _rpc_call(rpc_url, "eth_chainId")
+    if result is None:
+        return Finding(
+            rule_id="SK-008",
+            title="Chain ID check",
+            severity=Severity.MEDIUM,
+            status=Status.SKIP,
+            detail="Could not query eth_chainId",
+        )
+    chain_id = int(result.get("result", "0x0"), 16)
+    known = {1: "Ethereum", 137: "Polygon", 42161: "Arbitrum", 8453: "Base"}
+    name = known.get(chain_id, "Unknown")
+    return Finding(
+        rule_id="SK-008",
+        title=f"Chain ID: {chain_id} ({name})",
+        severity=Severity.MEDIUM,
+        status=Status.PASS,
+        detail=f"eth_chainId returned {chain_id}",
+    )
+
+
 # All checks in execution order
 ALL_CHECKS = [
     check_rpc_exposed,
     check_unlocked_accounts,
+    check_admin_apis,
+    check_debug_apis,
     check_mining_enabled,
     check_peer_count,
     check_sync_status,
+    check_chain_id,
 ]
