@@ -140,12 +140,12 @@ export default function Home() {
           </h2>
           <div className="grid md:grid-cols-3 gap-4">
             {[
-              { icon: "🔓", title: "Open Source", body: "Apache 2.0. Every tool, every line. Fork it, extend it, self-host it. No vendor lock-in, ever." },
-              { icon: "🧩", title: "Composable", body: "Each tool works standalone. Use ChainETL without ChainOps. Adopt one, then add more as your stack grows." },
-              { icon: "🏗️", title: "Production-Grade", body: "128+ tests across 5 products. Type-safe Python with mypy strict. CI on every push. Built to ship." },
+              { title: "Open Source", body: "Apache 2.0. Every tool, every line. Fork it, extend it, self-host it. No vendor lock-in, ever.", accent: "bg-purple-500" },
+              { title: "Composable", body: "Each tool works standalone. Use ChainETL without ChainOps. Adopt one, then add more as your stack grows.", accent: "bg-blue-500" },
+              { title: "Production-Grade", body: "128+ tests across 5 products. Type-safe Python with mypy strict. CI on every push. Built to ship.", accent: "bg-emerald-500" },
             ].map((item) => (
               <div key={item.title} className="rounded-xl border border-[var(--border)] p-6">
-                <div className="text-2xl mb-3">{item.icon}</div>
+                <div className={`w-8 h-1 ${item.accent} rounded-full mb-4`} />
                 <h3 className="font-bold mb-2">{item.title}</h3>
                 <p className="text-sm text-[var(--muted)] leading-relaxed">{item.body}</p>
               </div>
