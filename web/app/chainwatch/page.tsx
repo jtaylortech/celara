@@ -3,7 +3,7 @@ import { ProductPage } from "../components/product-page";
 
 export const metadata: Metadata = {
   title: "ChainWatch — Blockchain Observability | Celara",
-  description: "Prometheus metrics exporter for EVM nodes. Grafana dashboards included.",
+  description: "Prometheus metrics exporter for EVM nodes. Grafana dashboards included. 4 chains.",
 };
 
 export default function ChainWatch() {
@@ -11,104 +11,41 @@ export default function ChainWatch() {
     <ProductPage
       name="ChainWatch"
       tagline="Observability for decentralized systems"
-      description="Prometheus metrics exporter for blockchain nodes. Monitor sync status, peer count, gas prices, and client version across multiple EVM chains. All metrics are labeled by chain for multi-chain monitoring from a single exporter. Grafana dashboard included — import and go."
+      gradient="from-blue-500 to-purple-500"
+      description="Prometheus metrics exporter for blockchain nodes. Monitor sync status, peer count, gas prices, and client version across multiple EVM chains. All metrics labeled by chain. Grafana dashboard with 7 panels included."
       installCmd="pip install chainwatch"
+      heroCode={`# Start exporter
+$ chainwatch exporter --chain ethereum --port 9100
+Starting ethereum exporter on port 9100
+Metrics at http://localhost:9100/metrics
+
+# curl the metrics
+$ curl -s localhost:9100/metrics | grep chainwatch
+chainwatch_sync_status{chain="ethereum"} 1.0
+chainwatch_current_block{chain="ethereum"} 19234567.0
+chainwatch_peer_count{chain="ethereum"} 47.0
+chainwatch_gas_price_gwei{chain="ethereum"} 12.34
+
+# One-shot health check
+$ chainwatch status --chain polygon
+Checking polygon node at https://polygon-rpc.com...
+Node Status: OK`}
+      stats={[
+        { label: "EVM Chains", value: "4" },
+        { label: "Metrics", value: "6" },
+        { label: "Grafana Panels", value: "7" },
+        { label: "Tests", value: "9" },
+      ]}
       chains={["Ethereum", "Base", "Polygon", "Arbitrum"]}
       features={[
-        "Prometheus-native metrics with chain labels",
-        "Sync status monitoring (synced vs syncing)",
-        "Block height tracking over time",
-        "Peer count with health thresholds",
-        "Gas price tracking in gwei",
-        "Node client version reporting",
-        "Multi-chain from a single exporter instance",
-        "Configurable scrape intervals",
-        "One-shot health checks via CLI",
-        "Grafana dashboard JSON included (7 panels)",
+        { title: "Prometheus Native", desc: "Standard Prometheus gauges and info metrics. Scrape with any Prometheus-compatible system." },
+        { title: "Chain Labels", desc: "Every metric labeled with chain name. Filter and aggregate across your multi-chain fleet." },
+        { title: "Grafana Dashboard", desc: "7-panel dashboard included. Sync status, block height, peer count, gas price — all with chain selector." },
+        { title: "Alert Rules", desc: "Recommended alerts: sync lost, low peers, block stall, gas spike. Copy-paste into your alertmanager." },
+        { title: "One-Shot Checks", desc: "chainwatch status for quick health checks without running a persistent exporter." },
+        { title: "Multi-Chain", desc: "Run one exporter per chain on different ports. Or monitor all from a single Grafana dashboard." },
       ]}
-      quickStart={[
-        {
-          title: "Start the exporter",
-          language: "bash",
-          code: `pip install chainwatch
-chainwatch exporter --chain ethereum --port 9100
-
-# Metrics available at http://localhost:9100/metrics`,
-        },
-        {
-          title: "Monitor multiple chains",
-          language: "bash",
-          code: `# Run one exporter per chain (different ports)
-chainwatch exporter --chain ethereum --port 9100 &
-chainwatch exporter --chain polygon --port 9101 &
-chainwatch exporter --chain arbitrum --port 9102 &`,
-        },
-        {
-          title: "One-shot health check",
-          language: "bash",
-          code: `chainwatch status --chain ethereum
-# Checking ethereum node at https://eth.llamarpc.com...
-# Node Status: OK`,
-        },
-        {
-          title: "Prometheus scrape config",
-          language: "yaml",
-          code: `# prometheus.yml
-scrape_configs:
-  - job_name: chainwatch
-    scrape_interval: 15s
-    static_configs:
-      - targets:
-          - localhost:9100  # ethereum
-          - localhost:9101  # polygon
-          - localhost:9102  # arbitrum`,
-        },
-      ]}
-      cliReference={[
-        { command: "chainwatch exporter --chain ethereum --port 9100", description: "Start Prometheus metrics exporter" },
-        { command: "chainwatch exporter --chain polygon --interval 30", description: "Custom scrape interval (seconds)" },
-        { command: "chainwatch status --chain ethereum", description: "One-shot node health check" },
-        { command: "chainwatch chains", description: "List supported blockchains" },
-      ]}
-      docs={[
-        {
-          heading: "Metrics Reference",
-          content: `chainwatch_sync_status{chain="ethereum"} — 1 if synced, 0 if syncing. Use for alerting on sync regression.
-
-chainwatch_current_block{chain="ethereum"} — Current block number. Track block height over time to detect stalls.
-
-chainwatch_highest_block{chain="ethereum"} — Highest known block. Gap between current and highest indicates sync progress.
-
-chainwatch_peer_count{chain="ethereum"} — Connected peers. Alert if below 3 (network isolation risk).
-
-chainwatch_gas_price_gwei{chain="ethereum"} — Current gas price in gwei. Useful for transaction cost monitoring.
-
-chainwatch_node{chain="ethereum", client_version="Geth/v1.13.0"} — Node client info. Track client versions across your fleet.`,
-        },
-        {
-          heading: "Grafana Dashboard",
-          content: `A pre-built Grafana dashboard is included at dashboards/node-health.json with 7 panels:
-
-1. Sync Status (stat) — Green/red indicator
-2. Current Block (stat) — Latest block number
-3. Peer Count (gauge) — With red/orange/green thresholds
-4. Gas Price (stat) — Current gwei
-5. Block Height Over Time (timeseries)
-6. Peer Count Over Time (timeseries)
-7. Gas Price Over Time (timeseries)
-
-All panels use a $chain template variable for switching between chains. Import via Grafana UI → Dashboards → Import → Upload JSON.`,
-        },
-        {
-          heading: "Alert Rules",
-          content: `Recommended Prometheus alert rules:
-
-• Sync Lost: chainwatch_sync_status == 0 for 5m
-• Low Peers: chainwatch_peer_count < 3 for 2m
-• Block Stall: rate(chainwatch_current_block[5m]) == 0
-• Gas Spike: chainwatch_gas_price_gwei > 100`,
-        },
-      ]}
+      docsHref="/docs/chainwatch"
       sourceUrl="https://github.com/jtaylortech/celara-homepage/tree/main/chainwatch"
     />
   );

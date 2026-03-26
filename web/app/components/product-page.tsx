@@ -1,169 +1,148 @@
 import Link from "next/link";
 
-interface CodeExample {
+interface Feature {
   title: string;
-  language: string;
-  code: string;
-}
-
-interface DocSection {
-  heading: string;
-  content: string;
+  desc: string;
 }
 
 interface ProductPageProps {
   name: string;
   tagline: string;
+  gradient: string;
   description: string;
-  features: string[];
-  sourceUrl: string;
+  installCmd: string;
+  heroCode: string;
+  features: Feature[];
+  stats: { label: string; value: string }[];
   chains?: string[];
-  installCmd?: string;
-  quickStart: CodeExample[];
-  architecture?: string;
-  docs: DocSection[];
-  cliReference: { command: string; description: string }[];
+  docsHref: string;
+  sourceUrl: string;
 }
 
 export function ProductPage({
   name,
   tagline,
+  gradient,
   description,
-  features,
-  sourceUrl,
-  chains,
   installCmd,
-  quickStart,
-  architecture,
-  docs,
-  cliReference,
+  heroCode,
+  features,
+  stats,
+  chains,
+  docsHref,
+  sourceUrl,
 }: ProductPageProps) {
   return (
-    <main className="min-h-screen px-6 py-16 md:py-24">
-      <div className="max-w-3xl mx-auto">
-        <div className="flex items-center gap-4 mb-8">
+    <main className="min-h-screen">
+      {/* Hero */}
+      <section className="px-6 pt-20 pb-16 md:pt-32 md:pb-24">
+        <div className="max-w-3xl mx-auto">
           <Link href="/" className="text-sm text-[var(--muted)] hover:text-[var(--text)] transition-colors">
-            ← Home
+            ← Celara
           </Link>
-          <Link href="/docs" className="text-sm text-[var(--muted)] hover:text-[var(--text)] transition-colors">
-            Docs
-          </Link>
-        </div>
 
-        {/* Hero */}
-        <div className="space-y-4 mb-12">
-          <h1 className="text-4xl md:text-5xl font-bold tracking-tight">{name}</h1>
-          <p className="text-lg text-[var(--muted)]">{tagline}</p>
-        </div>
+          <div className="mt-8 space-y-4">
+            <div className="flex items-center gap-3">
+              <div className={`w-3 h-3 rounded-full bg-gradient-to-r ${gradient}`} />
+              <h1 className="text-4xl md:text-5xl font-bold tracking-tight">{name}</h1>
+            </div>
+            <p className="text-xl text-[var(--muted)] max-w-lg">{tagline}</p>
+          </div>
 
-        <p className="text-[var(--muted)] leading-relaxed mb-8">{description}</p>
+          <p className="mt-6 text-[var(--muted)] leading-relaxed max-w-xl">{description}</p>
 
-        {/* Install */}
-        {installCmd && (
-          <pre className="p-4 bg-[var(--surface)] border border-[var(--border)] rounded-lg text-sm overflow-x-auto mb-12">
-            <code className="text-emerald-400">$ {installCmd}</code>
+          <div className="mt-8 flex flex-wrap gap-3">
+            <Link
+              href={docsHref}
+              className="px-5 py-2.5 bg-white text-black text-sm font-medium rounded-lg hover:bg-gray-200 transition-colors"
+            >
+              Read the Docs
+            </Link>
+            <Link
+              href={sourceUrl}
+              className="px-5 py-2.5 border border-[var(--border)] text-sm font-medium rounded-lg hover:border-[var(--accent)] transition-colors"
+            >
+              View Source
+            </Link>
+          </div>
+
+          {/* Install */}
+          <pre className="mt-8 p-4 bg-[var(--surface)] border border-[var(--border)] rounded-lg text-sm overflow-x-auto">
+            <code><span className="text-[var(--muted)]">$</span> <span className="text-emerald-400">{installCmd}</span></code>
           </pre>
-        )}
+        </div>
+      </section>
 
-        {/* Quick Start */}
-        <section className="mb-12">
-          <h2 className="text-xl font-bold mb-6">Quick Start</h2>
-          <div className="space-y-6">
-            {quickStart.map((example) => (
-              <div key={example.title}>
-                <h3 className="text-sm font-medium text-[var(--muted)] mb-2">{example.title}</h3>
-                <pre className="p-4 bg-[var(--surface)] border border-[var(--border)] rounded-lg text-sm overflow-x-auto">
-                  <code className="text-emerald-400">{example.code}</code>
-                </pre>
+      {/* Code example */}
+      <section className="px-6 py-16 border-t border-[var(--border)]">
+        <div className="max-w-3xl mx-auto">
+          <h2 className="text-sm font-medium text-[var(--muted)] uppercase tracking-wide mb-6">See it in action</h2>
+          <pre className="p-6 bg-[var(--surface)] border border-[var(--border)] rounded-xl text-sm overflow-x-auto leading-relaxed">
+            <code className="text-emerald-400">{heroCode}</code>
+          </pre>
+        </div>
+      </section>
+
+      {/* Stats */}
+      <section className="px-6 py-16 border-t border-[var(--border)]">
+        <div className="max-w-3xl mx-auto">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+            {stats.map((s) => (
+              <div key={s.label}>
+                <div className="text-2xl font-bold">{s.value}</div>
+                <div className="text-sm text-[var(--muted)]">{s.label}</div>
               </div>
             ))}
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* Chains */}
-        {chains && chains.length > 0 && (
-          <section className="mb-12">
-            <h2 className="text-xl font-bold mb-4">Supported Chains</h2>
-            <div className="flex flex-wrap gap-2">
-              {chains.map((chain) => (
-                <span key={chain} className="px-3 py-1.5 text-sm bg-[var(--surface)] border border-[var(--border)] rounded-full text-[var(--muted)]">
-                  {chain}
-                </span>
+      {/* Chains */}
+      {chains && (
+        <section className="px-6 py-16 border-t border-[var(--border)]">
+          <div className="max-w-3xl mx-auto">
+            <h2 className="text-sm font-medium text-[var(--muted)] uppercase tracking-wide mb-6">Supported Chains</h2>
+            <div className="flex flex-wrap gap-3">
+              {chains.map((c) => (
+                <span key={c} className="px-4 py-2 bg-[var(--surface)] border border-[var(--border)] rounded-full text-sm">{c}</span>
               ))}
             </div>
-          </section>
-        )}
-
-        {/* Features */}
-        <section className="mb-12">
-          <h2 className="text-xl font-bold mb-4">Features</h2>
-          <ul className="space-y-2 text-sm text-[var(--muted)]">
-            {features.map((f) => (
-              <li key={f} className="flex gap-2">
-                <span className="text-emerald-400 shrink-0">✓</span>
-                {f}
-              </li>
-            ))}
-          </ul>
-        </section>
-
-        {/* Architecture */}
-        {architecture && (
-          <section className="mb-12">
-            <h2 className="text-xl font-bold mb-4">Architecture</h2>
-            <pre className="p-4 bg-[var(--surface)] border border-[var(--border)] rounded-lg text-sm overflow-x-auto text-[var(--muted)]">
-              {architecture}
-            </pre>
-          </section>
-        )}
-
-        {/* CLI Reference */}
-        <section className="mb-12">
-          <h2 className="text-xl font-bold mb-4">CLI Reference</h2>
-          <div className="border border-[var(--border)] rounded-lg overflow-hidden">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="bg-[var(--surface)]">
-                  <th className="text-left px-4 py-2 font-medium">Command</th>
-                  <th className="text-left px-4 py-2 font-medium">Description</th>
-                </tr>
-              </thead>
-              <tbody>
-                {cliReference.map((cmd) => (
-                  <tr key={cmd.command} className="border-t border-[var(--border)]">
-                    <td className="px-4 py-2">
-                      <code className="text-emerald-400 text-xs">{cmd.command}</code>
-                    </td>
-                    <td className="px-4 py-2 text-[var(--muted)]">{cmd.description}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
           </div>
         </section>
+      )}
 
-        {/* Detailed Docs */}
-        <section className="mb-12">
-          <h2 className="text-xl font-bold mb-6">Documentation</h2>
-          <div className="space-y-8">
-            {docs.map((section) => (
-              <div key={section.heading}>
-                <h3 className="font-semibold mb-3">{section.heading}</h3>
-                <div className="text-sm text-[var(--muted)] leading-relaxed whitespace-pre-line">
-                  {section.content}
-                </div>
+      {/* Features */}
+      <section className="px-6 py-16 border-t border-[var(--border)]">
+        <div className="max-w-3xl mx-auto">
+          <h2 className="text-sm font-medium text-[var(--muted)] uppercase tracking-wide mb-10">Features</h2>
+          <div className="grid md:grid-cols-2 gap-8">
+            {features.map((f) => (
+              <div key={f.title}>
+                <h3 className="font-semibold mb-1">{f.title}</h3>
+                <p className="text-sm text-[var(--muted)] leading-relaxed">{f.desc}</p>
               </div>
             ))}
           </div>
-        </section>
-
-        {/* Source */}
-        <div className="pt-8 border-t border-[var(--border)]">
-          <Link href={sourceUrl} className="text-sm text-[var(--accent)] hover:underline underline-offset-4">
-            View source on GitHub →
-          </Link>
         </div>
-      </div>
+      </section>
+
+      {/* CTA */}
+      <section className="px-6 py-20 border-t border-[var(--border)]">
+        <div className="max-w-3xl mx-auto text-center">
+          <h2 className="text-2xl font-bold mb-4">Get started in 30 seconds</h2>
+          <pre className="inline-block px-6 py-3 bg-[var(--surface)] border border-[var(--border)] rounded-lg text-sm mb-6">
+            <code className="text-emerald-400">$ {installCmd}</code>
+          </pre>
+          <div className="flex justify-center gap-4">
+            <Link href={docsHref} className="text-sm text-[var(--accent)] hover:underline underline-offset-4">
+              Documentation →
+            </Link>
+            <Link href={sourceUrl} className="text-sm text-[var(--muted)] hover:text-[var(--text)] transition-colors">
+              GitHub →
+            </Link>
+          </div>
+        </div>
+      </section>
     </main>
   );
 }
