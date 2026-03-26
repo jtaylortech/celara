@@ -12,12 +12,13 @@ export default function ChainETL() {
     <ProductPage
       name="ChainETL"
       tagline="Blockchain data pipelines"
-      description="Extract blockchain data and load it into your data warehouse. Stop writing custom indexers. Get clean, typed data direct to PostgreSQL with resumable syncs and reorg detection."
+      description="Extract blockchain data and load it into your data warehouse or local files. Stop writing custom indexers. Get clean, typed data to PostgreSQL or JSON Lines with resumable syncs and reorg detection."
       installCmd="pip install chainetl"
       chains={["Ethereum", "Base", "Polygon", "Arbitrum"]}
       features={[
         "Extract blocks, transactions, logs, and token transfers",
         "Multi-chain support (4 EVM chains)",
+        "PostgreSQL and JSON Lines output",
         "Resumable sync with checkpointing",
         "Chain reorganization detection",
         "ERC-20 and ERC-721 token transfer parsing",
