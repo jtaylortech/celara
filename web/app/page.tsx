@@ -80,13 +80,21 @@ export default function Home() {
           </div>
 
           {/* Quick install */}
-          <div className="mt-10">
-            <pre className="inline-block px-5 py-3 bg-[var(--surface)] border border-[var(--border)] rounded-lg text-sm overflow-x-auto">
-              <code>
-                <span className="text-[var(--muted)]">$</span>{" "}
-                <span className="text-emerald-400">pip install chainetl</span>
+          <div className="mt-10 flex flex-wrap gap-3">
+            {[
+              { name: "chainetl", color: "text-purple-400" },
+              { name: "chainops", color: "text-amber-400" },
+              { name: "chainwatch", color: "text-blue-400" },
+              { name: "securitykit", color: "text-pink-400" },
+              { name: "daoform", color: "text-teal-400" },
+            ].map((pkg) => (
+              <code
+                key={pkg.name}
+                className={`text-xs ${pkg.color} bg-[var(--surface)] border border-[var(--border)] px-3 py-1.5 rounded-lg`}
+              >
+                pip install {pkg.name}
               </code>
-            </pre>
+            ))}
           </div>
         </div>
       </section>
