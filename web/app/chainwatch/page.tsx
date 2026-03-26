@@ -15,6 +15,7 @@ export default function ChainWatch() {
       description="Prometheus metrics exporter for blockchain nodes. Monitor sync status, peer count, gas prices, and client version across multiple EVM chains. All metrics labeled by chain. Grafana dashboard with 7 panels included."
       installCmd="pip install chainwatch"
       screenshotSrc="/screenshots/chainwatch-metrics.png"
+      demoGif="/recordings/chainwatch-demo.gif"
       screenshotAlt="ChainWatch Prometheus metrics output"
       stats={[
         { label: "EVM Chains", value: "4" },

@@ -13,6 +13,7 @@ interface ProductPageProps {
   installCmd: string;
   screenshotSrc: string;
   screenshotAlt: string;
+  demoGif?: string;
   features: Feature[];
   stats: { label: string; value: string }[];
   chains?: string[];
@@ -28,6 +29,7 @@ export function ProductPage({
   installCmd,
   screenshotSrc,
   screenshotAlt,
+  demoGif,
   features,
   stats,
   chains,
@@ -75,12 +77,16 @@ export function ProductPage({
         </div>
       </section>
 
-      {/* Screenshot */}
+      {/* Demo */}
       <section className="px-6 py-16 border-t border-[var(--border)]">
         <div className="max-w-3xl mx-auto">
           <h2 className="text-sm font-medium text-[var(--muted)] uppercase tracking-wide mb-6">See it in action</h2>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={screenshotSrc} alt={screenshotAlt} className="w-full rounded-xl" />
+          <img
+            src={demoGif || screenshotSrc}
+            alt={screenshotAlt}
+            className="w-full rounded-xl border border-[var(--border)]"
+          />
         </div>
       </section>
 

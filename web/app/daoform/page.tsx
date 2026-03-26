@@ -15,6 +15,7 @@ export default function DAOForm() {
       description="Define your DAO's governance in YAML. Create proposals, cast weighted votes, and resolve outcomes with configurable quorum and threshold rules. Version-controlled, auditable, reproducible. Python SDK for building governance UIs."
       installCmd="pip install daoform"
       screenshotSrc="/screenshots/daoform-init.png"
+      demoGif="/recordings/daoform-demo.gif"
       screenshotAlt="DAOForm initializing governance config"
       stats={[
         { label: "Tests", value: "18" },

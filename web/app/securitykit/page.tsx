@@ -15,6 +15,7 @@ export default function SecurityKit() {
       description="Scan your blockchain nodes for security misconfigurations via JSON-RPC. No SSH, no agents. 8 checks covering unlocked accounts, exposed admin APIs, peer connectivity, and sync status. Markdown reports for compliance. JSON output for CI/CD."
       installCmd="pip install securitykit"
       screenshotSrc="/screenshots/securitykit-scan.png"
+      demoGif="/recordings/securitykit-demo.gif"
       screenshotAlt="SecurityKit scanning a node for vulnerabilities"
       stats={[
         { label: "Security Checks", value: "8" },

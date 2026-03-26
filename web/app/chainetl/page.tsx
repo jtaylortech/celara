@@ -15,6 +15,7 @@ export default function ChainETL() {
       description="Extract blocks, transactions, logs, and token transfers from any EVM chain. Load into PostgreSQL for analytics or JSON Lines for local processing with jq, DuckDB, or pandas. Resumable syncs, reorg detection, and ERC-20/721 token parsing."
       installCmd="pip install chainetl"
       screenshotSrc="/screenshots/chainetl-sync.png"
+      demoGif="/recordings/chainetl-demo.gif"
       screenshotAlt="ChainETL syncing Ethereum blocks to JSON Lines"
       stats={[
         { label: "EVM Chains", value: "4" },

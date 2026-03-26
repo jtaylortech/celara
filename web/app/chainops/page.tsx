@@ -15,6 +15,7 @@ export default function ChainOps() {
       description="Deploy blockchain validators with a single command. ChainOps generates Terraform configurations for AWS with chain-specific defaults — instance types, storage, security groups, and monitoring. Cost estimation before you deploy."
       installCmd="pip install chainops"
       screenshotSrc="/screenshots/chainops-deploy.png"
+      demoGif="/recordings/chainops-demo.gif"
       screenshotAlt="ChainOps deploying an Ethereum validator"
       stats={[
         { label: "Chains", value: "2" },
