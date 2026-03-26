@@ -1,124 +1,63 @@
 # ChainWatch
 
-Observability for decentralized systems. Prometheus exporters for blockchain nodes.
+Prometheus metrics exporter for EVM blockchain nodes.
 
-**Status:** In Development  
-**Supported Chains:** Ethereum
+[![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
+[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 
-## What is ChainWatch?
+---
 
-ChainWatch provides production-grade monitoring for blockchain infrastructure. Export node metrics to Prometheus, visualize in Grafana, alert on issues.
+## What it does
+
+Expose blockchain node metrics as Prometheus gauges. Monitor sync status, peer count, gas prices, and client version across multiple EVM chains from a single exporter.
+
+**Supported chains**: Ethereum · Base · Polygon · Arbitrum
 
 ## Quick Start
-
-### Installation
 
 ```bash
 cd chainwatch
 uv sync
 cp .env.example .env
+
+# Start Prometheus exporter
+uv run chainwatch exporter --chain ethereum --port 9100
+
+# One-shot health check
+uv run chainwatch status --chain polygon
+
+# List supported chains
+uv run chainwatch chains
 ```
 
-### Run the Exporter
+Metrics at `http://localhost:9100/metrics`
 
-```bash
-# Start Prometheus exporter on port 9100
-uv run chainwatch exporter --chain ethereum
+## Metrics
 
-# Custom port and interval
-uv run chainwatch exporter --chain ethereum --port 9200 --interval 30
-```
+| Metric | Description | Labels |
+|--------|-------------|--------|
+| `chainwatch_sync_status` | 1=synced, 0=syncing | chain |
+| `chainwatch_current_block` | Current block number | chain |
+| `chainwatch_highest_block` | Highest known block | chain |
+| `chainwatch_peer_count` | Connected peers | chain |
+| `chainwatch_gas_price_gwei` | Gas price in gwei | chain |
+| `chainwatch_node` | Client version info | chain |
 
-### Check Node Status
+## Grafana
 
-```bash
-uv run chainwatch status --chain ethereum
-```
-
-## Metrics Exported
-
-| Metric | Type | Description |
-|--------|------|-------------|
-| `chainwatch_sync_status` | Gauge | Node sync status (1=synced, 0=syncing) |
-| `chainwatch_current_block` | Gauge | Current block number |
-| `chainwatch_highest_block` | Gauge | Highest known block number |
-| `chainwatch_peer_count` | Gauge | Number of connected peers |
-| `chainwatch_gas_price_gwei` | Gauge | Current gas price in gwei |
-| `chainwatch_node_info` | Info | Node client version and chain |
-
-## Configuration
-
-Environment variables (or `.env` file):
-
-```bash
-ETHEREUM_RPC_URL=https://eth.llamarpc.com
-EXPORTER_PORT=9100
-SCRAPE_INTERVAL=15
-```
-
-## Prometheus Integration
-
-Add to your `prometheus.yml`:
+Scrape config for `prometheus.yml`:
 
 ```yaml
 scrape_configs:
-  - job_name: 'chainwatch'
+  - job_name: chainwatch
     static_configs:
       - targets: ['localhost:9100']
 ```
 
-## Grafana Dashboard
-
-Import the dashboard from `dashboards/ethereum.json` (coming soon).
-
-## CLI Reference
-
-### `chainwatch exporter`
-
-Run Prometheus metrics exporter.
-
-| Option | Default | Description |
-|--------|---------|-------------|
-| `--chain` | `ethereum` | Chain to export metrics for |
-| `--port` | `9100` | Prometheus metrics port |
-| `--interval` | `15` | Scrape interval in seconds |
-
-### `chainwatch status`
-
-Check node status (one-shot metrics collection).
-
-| Option | Default | Description |
-|--------|---------|-------------|
-| `--chain` | `ethereum` | Chain to check |
-
-## Development
-
-```bash
-# Install dev dependencies
-uv sync --all-extras
-
-# Run tests
-uv run pytest
-
-# Lint
-uv run ruff check .
-
-# Type check
-uv run mypy src/
-```
-
-## Roadmap
-
-- [ ] Solana exporter
-- [ ] Beacon chain (consensus) metrics
-- [ ] Validator performance metrics
-- [ ] Alert rules templates
-- [ ] Grafana dashboards
-
 ## License
 
-Apache 2.0
+Apache 2.0 — See [LICENSE](LICENSE)
 
 ---
 
-**Built by [Jarred](https://github.com/jtaylortech) & [Kofi](https://github.com/kofikwarba)**
+Part of [Celara](https://celara.dev) — open-source DevOps tooling for decentralized systems.
