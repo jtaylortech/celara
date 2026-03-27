@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { useState } from "react";
 
 const products = [
   {
@@ -8,6 +11,17 @@ const products = [
     href: "/chainetl",
     gradient: "from-purple-500 to-pink-500",
     cmd: "chainetl sync --chain ethereum --start-block 18000000 --count 10",
+    expanded: `$ chainetl sync --chain ethereum --start-block 18000000 --count 10 --destination jsonl
+
+Syncing blocks 18000000 to 18000009 (10 blocks)
+Extracting blocks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 10/10
+Loaded 10 blocks
+Checkpoint saved at block 18000009
+
+$ cat output/ethereum_blocks.jsonl | jq '.number'
+18000000
+18000001
+18000002`,
   },
   {
     name: "ChainOps",
@@ -16,6 +30,16 @@ const products = [
     href: "/chainops",
     gradient: "from-yellow-400 to-amber-500",
     cmd: "chainops init ethereum --network mainnet",
+    expanded: `$ chainops init ethereum --network mainnet --region us-east-1
+✓ Configuration saved to chainops.yaml
+
+$ chainops estimate
+┌─────────────────────────────┬──────────┐
+│ EC2 Instance (t3.xlarge)    │  $120.00 │
+│ EBS Storage (2TB gp3)       │  $160.00 │
+│ Data Transfer (~500GB)      │   $45.00 │
+│ Total                       │  $335.00 │
+└─────────────────────────────┴──────────┘`,
   },
   {
     name: "ChainWatch",
@@ -24,6 +48,15 @@ const products = [
     href: "/chainwatch",
     gradient: "from-blue-500 to-purple-500",
     cmd: "chainwatch exporter --chain ethereum --port 9100",
+    expanded: `$ chainwatch exporter --chain ethereum --port 9100
+Starting ethereum exporter on port 9100
+Metrics at http://localhost:9100/metrics
+
+$ curl -s localhost:9100/metrics | grep chainwatch
+chainwatch_sync_status{chain="ethereum"}    1.0
+chainwatch_current_block{chain="ethereum"}  19234567.0
+chainwatch_peer_count{chain="ethereum"}     47.0
+chainwatch_gas_price_gwei{chain="ethereum"} 12.34`,
   },
   {
     name: "SecurityKit",
@@ -32,6 +65,18 @@ const products = [
     href: "/securitykit",
     gradient: "from-pink-500 to-amber-500",
     cmd: "securitykit scan --rpc-url https://eth.llamarpc.com",
+    expanded: `$ securitykit scan --rpc-url https://eth.llamarpc.com
+
+  ✅ [SK-001] RPC endpoint is reachable
+  ✅ [SK-002] No unlocked accounts
+  ✅ [SK-003] Admin API is not exposed
+  ✅ [SK-004] Debug API is not exposed
+  ✅ [SK-005] Mining is disabled
+  ✅ [SK-006] Peer count healthy — 47 peers
+  ✅ [SK-007] Node is fully synced
+  ✅ [SK-008] Chain ID: 1 (Ethereum)
+
+Results: 8 passed, 0 failed, 0 skipped`,
   },
   {
     name: "DAOForm",
@@ -40,26 +85,58 @@ const products = [
     href: "/daoform",
     gradient: "from-teal-400 to-blue-500",
     cmd: "daoform init --name MyDAO",
+    expanded: `$ daoform init --name MyDAO
+Created dao.yaml for 'MyDAO'
+  Quorum: 10.0%
+  Threshold: 50.0%
+  Voting period: 7 days
+
+$ daoform validate
+✅ Valid config for 'MyDAO'
+
+$ daoform propose --id PROP-1 --title "Fund core dev" --author alice.eth
+Created proposal: PROP-1
+  Title: Fund core dev
+  Status: draft`,
   },
 ];
 
 function ProductCard({ product }: { product: typeof products[number] }) {
+  const [expanded, setExpanded] = useState(false);
+
   return (
-    <Link
-      href={product.href}
-      className="group relative overflow-hidden rounded-xl border border-[var(--border)] hover:border-[var(--accent)] transition-all p-6"
-    >
+    <div className="group relative overflow-hidden rounded-xl border border-[var(--border)] hover:border-[var(--accent)] transition-all">
       <div className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${product.gradient}`} />
-      <div className="flex items-center justify-between mb-3">
-        <h3 className="text-lg font-bold">{product.name}</h3>
-        <span className="text-xs text-[var(--muted)] opacity-0 group-hover:opacity-100 transition-opacity">→</span>
+
+      <Link href={product.href} className="block p-6 pb-3">
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-lg font-bold">{product.name}</h3>
+          <span className="text-xs text-[var(--muted)] opacity-0 group-hover:opacity-100 transition-opacity">→</span>
+        </div>
+        <p className="text-xs text-[var(--muted)] uppercase tracking-wide mb-2">{product.desc}</p>
+        <p className="text-sm opacity-80 leading-relaxed">{product.detail}</p>
+      </Link>
+
+      <div className="px-6 pb-5">
+        <button
+          onClick={() => setExpanded(!expanded)}
+          className="w-full text-left cursor-pointer"
+        >
+          <div className="flex items-center justify-between text-xs text-emerald-400 bg-emerald-400/5 border border-emerald-400/10 px-3 py-2 rounded-lg font-mono hover:bg-emerald-400/10 transition-colors">
+            <span>$ {product.cmd}</span>
+            <span className="text-[var(--muted)] text-[10px] ml-2">
+              {expanded ? "▲ collapse" : "▼ expand"}
+            </span>
+          </div>
+        </button>
+
+        {expanded && (
+          <pre className="mt-2 p-4 bg-[var(--bg)] border border-[var(--border)] rounded-lg text-xs overflow-x-auto animate-in fade-in duration-200">
+            <code className="text-emerald-400 whitespace-pre">{product.expanded}</code>
+          </pre>
+        )}
       </div>
-      <p className="text-xs text-[var(--muted)] uppercase tracking-wide mb-2">{product.desc}</p>
-      <p className="text-sm opacity-80 leading-relaxed mb-4">{product.detail}</p>
-      <code className="block text-xs text-emerald-400 bg-emerald-400/5 border border-emerald-400/10 px-3 py-2 rounded-lg font-mono">
-        $ {product.cmd}
-      </code>
-    </Link>
+    </div>
   );
 }
 
