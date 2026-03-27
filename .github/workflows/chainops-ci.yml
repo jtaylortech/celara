@@ -1,0 +1,36 @@
+name: Chainops CI
+
+on:
+  push:
+    paths: ['chainops/**']
+  pull_request:
+    paths: ['chainops/**']
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.11', '3.12', '3.13']
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v4
+        with:
+          version: 'latest'
+
+      - name: Set up Python ${{ matrix.python-version }}
+        run: uv python install ${{ matrix.python-version }}
+
+      - name: Install dependencies
+        working-directory: chainops
+        run: uv sync --dev
+
+      - name: Lint
+        working-directory: chainops
+        run: uv run ruff check .
+
+      - name: Test
+        working-directory: chainops
+        run: uv run pytest -v

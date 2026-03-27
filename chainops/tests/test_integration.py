@@ -36,13 +36,14 @@ def test_template_files_exist():
         assert filepath.exists(), f"Missing template file: {filename}"
 
 
+@pytest.mark.skipif(
+    not shutil.which("terraform"),
+    reason="Terraform not installed",
+)
 def test_terraform_template_valid():
     """Verify Terraform template is valid."""
     template_dir = Path(__file__).parent.parent / "templates" / "ethereum"
 
-    # Skip if terraform not installed
-    if not shutil.which("terraform"):
-        pytest.skip("Terraform not installed")
 
     with TemporaryDirectory() as tmpdir:
         # Copy templates (both .tf and .yaml files)
@@ -211,11 +212,12 @@ def test_deployer_creates_tfvars():
         assert loaded["instance_type"] == "t3.xlarge"
 
 
+@pytest.mark.skipif(
+    not shutil.which("terraform"),
+    reason="Terraform not installed",
+)
 def test_terraform_plan_works():
     """Test that terraform plan works with our config."""
-    if not shutil.which("terraform"):
-        pytest.skip("Terraform not installed")
-
     config = ChainOpsConfig(
         name="test-validator", chain="ethereum", network="sepolia", provider="aws"
     )

@@ -1,0 +1,36 @@
+name: Daoform CI
+
+on:
+  push:
+    paths: ['daoform/**']
+  pull_request:
+    paths: ['daoform/**']
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.11', '3.12', '3.13']
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v4
+        with:
+          version: 'latest'
+
+      - name: Set up Python ${{ matrix.python-version }}
+        run: uv python install ${{ matrix.python-version }}
+
+      - name: Install dependencies
+        working-directory: daoform
+        run: uv sync --dev
+
+      - name: Lint
+        working-directory: daoform
+        run: uv run ruff check .
+
+      - name: Test
+        working-directory: daoform
+        run: uv run pytest -v

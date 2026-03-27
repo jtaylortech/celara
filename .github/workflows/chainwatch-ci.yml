@@ -1,0 +1,36 @@
+name: Chainwatch CI
+
+on:
+  push:
+    paths: ['chainwatch/**']
+  pull_request:
+    paths: ['chainwatch/**']
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.11', '3.12', '3.13']
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v4
+        with:
+          version: 'latest'
+
+      - name: Set up Python ${{ matrix.python-version }}
+        run: uv python install ${{ matrix.python-version }}
+
+      - name: Install dependencies
+        working-directory: chainwatch
+        run: uv sync --dev
+
+      - name: Lint
+        working-directory: chainwatch
+        run: uv run ruff check .
+
+      - name: Test
+        working-directory: chainwatch
+        run: uv run pytest -v
