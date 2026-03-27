@@ -1,1 +1,0 @@
-# celara-homepage

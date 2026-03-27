@@ -1,97 +1,69 @@
 # Celara
 
-**DevOps tooling for decentralized systems**
-
-Open-source infrastructure for blockchain validators, node operators, and DAOs.
+Open-source DevOps tooling for decentralized systems.
 
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 [![Website](https://img.shields.io/badge/web-celara.dev-5C6FFF)](https://celara.dev)
+[![Tests](https://img.shields.io/badge/tests-134%20passing-brightgreen)](https://github.com/jtaylortech/celara-homepage)
 
 ---
 
 ## Products
 
-| Product | Purpose | Status |
-|---------|---------|--------|
-| **[ChainETL](chainetl/)** | Blockchain data pipelines | In Development |
-| **[ChainOps](chainops/)** | Infrastructure-as-Code for validators | In Development |
-| **[ChainWatch](chainwatch/)** | Observability for decentralized systems | In Development |
-| **[SecurityKit](securitykit/)** | Automated security for node operators | Planning |
-| **[DAOForm](daoform/)** | Governance-as-Code | Planning |
+| Product | What it does | Tests |
+|---------|-------------|-------|
+| **[ChainETL](chainetl/)** | Blockchain data pipelines — 4 EVM chains, Postgres + JSONL, REST API | 74 |
+| **[ChainOps](chainops/)** | Infrastructure-as-Code — Terraform validator deployment for ETH + SOL | 12 |
+| **[ChainWatch](chainwatch/)** | Observability — Prometheus metrics exporter, Grafana dashboard | 9 |
+| **[SecurityKit](securitykit/)** | Security — 8 RPC-based node checks, audit reports | 21 |
+| **[DAOForm](daoform/)** | Governance — proposals, weighted voting, YAML persistence | 18 |
 
----
+## Install
+
+```bash
+pip install chainetl chainops chainwatch securitykit daoform
+```
 
 ## Quick Start
 
-### Marketing Site
-
 ```bash
-cd web
-npm install
-npm run dev
+# Extract blockchain data
+chainetl sync --chain ethereum --start-block 18000000 --count 10
+
+# Deploy a validator
+chainops init ethereum --network mainnet && chainops deploy
+
+# Monitor a node
+chainwatch exporter --chain ethereum --port 9100
+
+# Security scan
+securitykit scan --rpc-url https://eth.llamarpc.com
+
+# DAO governance
+daoform init --name MyDAO && daoform validate
+
+# Start the REST API
+chainetl serve --port 8000
 ```
-
-Visit **http://localhost:3000**
-
-### ChainETL
-
-```bash
-cd chainetl
-uv sync
-uv run chainetl sync --chain ethereum --start-block 18000000 --count 10
-```
-
-### ChainWatch
-
-```bash
-cd chainwatch
-uv sync
-uv run chainwatch exporter --chain ethereum
-```
-
----
-
-## Repository Structure
-
-```
-celara-homepage/
-├── chainetl/          # Blockchain data pipelines
-├── chainops/          # Infrastructure-as-Code for validators
-├── chainwatch/        # Observability for decentralized systems
-├── securitykit/       # Automated security for node operators
-├── daoform/           # Governance-as-Code
-├── web/               # Next.js marketing site
-└── docs/              # Documentation
-```
-
----
 
 ## Documentation
 
-- **[Design System](docs/DESIGN_SYSTEM.md)** - Brand colors, typography, components
-- **[Product Architecture](docs/strategy/product-architecture.md)** - Product suite overview
-- **[Contributing Guide](CONTRIBUTING.md)** - How to contribute
+Full docs at **[celara.dev/docs](https://celara.dev/docs)**
 
----
+- [ChainETL](https://celara.dev/docs/chainetl) — extraction, models, CLI, adding chains
+- [ChainOps](https://celara.dev/docs/chainops) — deployment, costs, Terraform
+- [ChainWatch](https://celara.dev/docs/chainwatch) — metrics, Grafana, alerts
+- [SecurityKit](https://celara.dev/docs/securitykit) — checks, reports, custom rules
+- [DAOForm](https://celara.dev/docs/daoform) — governance model, SDK, persistence
+- [REST API](https://celara.dev/docs/api) — endpoints, response models, client examples
 
 ## Contributing
 
-We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
-
-```bash
-# Fork the repo, then:
-git checkout -b feature/your-feature
-# Make changes
-git commit -m "feat: your feature"
-git push origin feature/your-feature
-# Open a PR
-```
-
----
+See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## License
 
-Apache 2.0 - See [LICENSE](LICENSE) for details.
+Apache 2.0 — See [LICENSE](LICENSE)
 
 ---
 
