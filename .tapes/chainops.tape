@@ -1,7 +1,7 @@
 Output web/public/recordings/chainops-demo.gif
 Set Theme "Dracula"
-Set FontSize 14
-Set Width 800
+Set FontSize 16
+Set Width 1200
 Set Height 500
 Set Padding 20
 Set TypingSpeed 40ms

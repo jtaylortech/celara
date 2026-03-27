@@ -1,7 +1,7 @@
 Output web/public/recordings/securitykit-demo.gif
 Set Theme "Dracula"
-Set FontSize 14
-Set Width 800
+Set FontSize 16
+Set Width 1200
 Set Height 550
 Set Padding 20
 Set TypingSpeed 40ms
