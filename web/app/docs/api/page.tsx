@@ -148,15 +148,17 @@ export default function APIDocs() {
     <div className="space-y-12">
       <section>
         <h1 className="text-3xl font-bold mb-4">REST API</h1>
-        <p className="text-[var(--muted)] leading-relaxed mb-6">
-          Query blockchain data from any EVM chain over HTTP. Real-time data from RPC nodes — no database required.
-          Auto-generated interactive docs available at <code className="text-emerald-400">/docs</code> (Swagger) and <code className="text-emerald-400">/redoc</code> (ReDoc) when running the server.
+        <p className="text-[var(--muted)] leading-relaxed mb-2">
+          Run your own blockchain data API. ChainETL includes a FastAPI server that queries EVM nodes in real-time — no database, no third-party service, no API keys. Self-hosted and fully open source.
+        </p>
+        <p className="text-sm text-[var(--muted)] mb-6">
+          Interactive docs available at <code className="text-emerald-400">/docs</code> (Swagger) and <code className="text-emerald-400">/redoc</code> (ReDoc) when running locally.
         </p>
 
         <div className="grid md:grid-cols-3 gap-4 mb-8">
           {[
             { label: "Chains", value: "4 EVM" },
-            { label: "Auth", value: "None (open)" },
+            { label: "Auth", value: "Self-hosted" },
             { label: "Format", value: "JSON" },
           ].map((s) => (
             <div key={s.label} className="rounded-lg border border-[var(--border)] p-4 text-center">
