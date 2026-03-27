@@ -1,7 +1,4 @@
-"use client";
-
 import Link from "next/link";
-import { useState } from "react";
 
 const products = [
   {
@@ -102,40 +99,31 @@ Created proposal: PROP-1
 ];
 
 function ProductCard({ product }: { product: typeof products[number] }) {
-  const [expanded, setExpanded] = useState(false);
-
   return (
     <div className="group relative overflow-hidden rounded-xl border border-[var(--border)] hover:border-[var(--accent)] transition-all">
       <div className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${product.gradient}`} />
 
-      <Link href={product.href} className="block p-6 pb-3">
+      <Link href={product.href} className="block p-6">
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-lg font-bold">{product.name}</h3>
           <span className="text-xs text-[var(--muted)] opacity-0 group-hover:opacity-100 transition-opacity">→</span>
         </div>
         <p className="text-xs text-[var(--muted)] uppercase tracking-wide mb-2">{product.desc}</p>
-        <p className="text-sm opacity-80 leading-relaxed">{product.detail}</p>
-      </Link>
+        <p className="text-sm opacity-80 leading-relaxed mb-4">{product.detail}</p>
 
-      <div className="px-6 pb-5">
-        <button
-          onClick={() => setExpanded(!expanded)}
-          className="w-full text-left cursor-pointer"
-        >
-          <div className="flex items-center justify-between text-xs text-emerald-400 bg-emerald-400/5 border border-emerald-400/10 px-3 py-2 rounded-lg font-mono hover:bg-emerald-400/10 transition-colors">
-            <span>$ {product.cmd}</span>
-            <span className="text-[var(--muted)] text-[10px] ml-2">
-              {expanded ? "▲ collapse" : "▼ expand"}
-            </span>
+        <code className="block text-xs text-emerald-400 bg-emerald-400/5 border border-emerald-400/10 px-3 py-2 rounded-lg font-mono">
+          $ {product.cmd}
+        </code>
+
+        {/* Hover reveal */}
+        <div className="grid grid-rows-[0fr] group-hover:grid-rows-[1fr] transition-[grid-template-rows] duration-300">
+          <div className="overflow-hidden">
+            <pre className="mt-3 p-4 bg-[var(--bg)] border border-[var(--border)] rounded-lg text-xs overflow-x-auto">
+              <code className="text-emerald-400 whitespace-pre">{product.expanded}</code>
+            </pre>
           </div>
-        </button>
-
-        {expanded && (
-          <pre className="mt-2 p-4 bg-[var(--bg)] border border-[var(--border)] rounded-lg text-xs overflow-x-auto animate-in fade-in duration-200">
-            <code className="text-emerald-400 whitespace-pre">{product.expanded}</code>
-          </pre>
-        )}
-      </div>
+        </div>
+      </Link>
     </div>
   );
 }
