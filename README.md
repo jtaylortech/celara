@@ -1,22 +1,33 @@
+<div align="center">
+
 # Celara
 
-Open-source DevOps tooling for decentralized systems.
+**DevOps tooling for decentralized systems.**
+
+Deploy, monitor, analyze, secure, and govern blockchain infrastructure — from a single open-source toolkit.
 
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
-[![Website](https://img.shields.io/badge/web-celara.dev-5C6FFF)](https://celara.dev)
-[![Tests](https://img.shields.io/badge/tests-134%20passing-brightgreen)](https://github.com/jtaylortech/celara-homepage)
+[![Tests](https://img.shields.io/badge/tests-136%20passing-brightgreen)](#)
+[![Python](https://img.shields.io/badge/python-3.11+-3776AB.svg)](https://python.org)
+[![Website](https://img.shields.io/badge/celara.dev-5C6FFF?style=flat&logo=data:image/svg+xml;base64,&label=web)](https://celara.dev)
+
+[Website](https://celara.dev) · [Documentation](https://celara.dev/docs) · [API Reference](https://celara.dev/docs/api)
+
+</div>
 
 ---
 
-## Products
+![Celara CLI](assets/hero.png)
 
-| Product | What it does | Tests |
-|---------|-------------|-------|
-| **[ChainETL](chainetl/)** | Blockchain data pipelines — 4 EVM chains, Postgres + JSONL, REST API | 74 |
-| **[ChainOps](chainops/)** | Infrastructure-as-Code — Terraform validator deployment for ETH + SOL | 12 |
-| **[ChainWatch](chainwatch/)** | Observability — Prometheus metrics exporter, Grafana dashboard | 9 |
-| **[SecurityKit](securitykit/)** | Security — 8 RPC-based node checks, audit reports | 21 |
-| **[DAOForm](daoform/)** | Governance — proposals, weighted voting, YAML persistence | 18 |
+## The Stack
+
+| | Product | What it does |
+|---|---------|-------------|
+| 🟣 | **[ChainETL](chainetl/)** | Extract blocks, transactions, logs, and token transfers from 4 EVM chains. Postgres + JSON Lines + REST API. |
+| 🟡 | **[ChainOps](chainops/)** | Deploy validators with one command. Terraform templates for Ethereum + Solana on AWS. Cost estimation included. |
+| 🔵 | **[ChainWatch](chainwatch/)** | Prometheus metrics exporter for EVM nodes. Grafana dashboard with 7 panels. Multi-chain monitoring. |
+| 🔴 | **[SecurityKit](securitykit/)** | 8 RPC-based security checks. No SSH required. Markdown audit reports. CI/CD ready. |
+| 🟢 | **[DAOForm](daoform/)** | Governance-as-Code. Proposals, weighted voting, quorum rules. YAML config + Python SDK. |
 
 ## Install
 
@@ -27,39 +38,50 @@ pip install chainetl chainops chainwatch securitykit daoform
 ## Quick Start
 
 ```bash
-# Extract blockchain data
-chainetl sync --chain ethereum --start-block 18000000 --count 10
+# Index Ethereum blocks to JSON files
+chainetl sync --chain ethereum --start-block 18000000 --count 100 --destination jsonl
 
 # Deploy a validator
-chainops init ethereum --network mainnet && chainops deploy
+chainops init ethereum --network mainnet && chainops estimate
 
-# Monitor a node
+# Monitor your node
 chainwatch exporter --chain ethereum --port 9100
 
-# Security scan
+# Security audit
 securitykit scan --rpc-url https://eth.llamarpc.com
 
 # DAO governance
 daoform init --name MyDAO && daoform validate
 
-# Start the REST API
+# REST API
 chainetl serve --port 8000
+# → http://localhost:8000/docs
 ```
+
+## Why Celara
+
+- **Open source** — Apache 2.0. Every tool, every line. Self-host everything.
+- **Composable** — Each tool works standalone. Use one or all five.
+- **Multi-chain** — Ethereum, Base, Polygon, Arbitrum. Adding a chain is a 3-line file.
+- **Production-grade** — 136 tests. Type-safe Python. CI on every push.
 
 ## Documentation
 
-Full docs at **[celara.dev/docs](https://celara.dev/docs)**
+Full docs at **[celara.dev/docs](https://celara.dev/docs)** — sidebar navigation, code examples, API reference.
 
-- [ChainETL](https://celara.dev/docs/chainetl) — extraction, models, CLI, adding chains
-- [ChainOps](https://celara.dev/docs/chainops) — deployment, costs, Terraform
-- [ChainWatch](https://celara.dev/docs/chainwatch) — metrics, Grafana, alerts
-- [SecurityKit](https://celara.dev/docs/securitykit) — checks, reports, custom rules
-- [DAOForm](https://celara.dev/docs/daoform) — governance model, SDK, persistence
-- [REST API](https://celara.dev/docs/api) — endpoints, response models, client examples
+Each product also has docs in its directory:
+
+```
+chainetl/docs/     → configuration, data models, API, adding chains
+chainwatch/docs/   → metrics reference, alert rules, Grafana
+chainops/docs/     → deployment guide, cost estimates
+securitykit/docs/  → all 8 checks with remediation steps
+daoform/docs/      → governance model, SDK, persistence
+```
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md).
+See [CONTRIBUTING.md](CONTRIBUTING.md). Fork, branch, test, PR.
 
 ## License
 
@@ -67,4 +89,8 @@ Apache 2.0 — See [LICENSE](LICENSE)
 
 ---
 
-**Built by [Jarred](https://github.com/jtaylortech) & [Kofi](https://github.com/kofikwarba)**
+<div align="center">
+
+Built by [Jarred](https://github.com/jtaylortech) & [Kofi](https://github.com/kofikwarba)
+
+</div>
