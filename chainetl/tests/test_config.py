@@ -13,4 +13,4 @@ def test_settings_env_override(monkeypatch, tmp_path, capsys) -> None:
 
     importlib.reload(config_module)
 
-    assert config_module.settings.ethereum_rpc_url == "http://localhost:8545"
+    assert str(config_module.settings.ethereum_rpc_url) == "http://localhost:8545/"

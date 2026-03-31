@@ -12,6 +12,7 @@ def extractor() -> EthereumExtractor:
     return EthereumExtractor(rpc_url="https://eth.llamarpc.com")
 
 
+@pytest.mark.integration
 def test_extract_block(extractor: EthereumExtractor) -> None:
     """Test extracting a block."""
     block = extractor.extract_block(18000000)
@@ -22,18 +23,21 @@ def test_extract_block(extractor: EthereumExtractor) -> None:
     assert block.timestamp > 0
 
 
+@pytest.mark.integration
 def test_extract_latest_block_number(extractor: EthereumExtractor) -> None:
     """Test getting latest block number."""
     latest = extractor.extract_latest_block_number()
     assert latest > 18000000  # Should be higher than this old block
 
 
+@pytest.mark.integration
 def test_extract_invalid_block(extractor: EthereumExtractor) -> None:
     """Test extracting invalid block."""
     with pytest.raises(ValueError, match="Block .* not found"):
         extractor.extract_block(999999999999)
 
 
+@pytest.mark.integration
 def test_extract_blocks_batch(extractor: EthereumExtractor) -> None:
     """Test extracting multiple blocks in a batch."""
     # Extract 3 blocks starting from 18000000

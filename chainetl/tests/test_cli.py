@@ -287,7 +287,7 @@ def test_sync_unsupported_chain(monkeypatch) -> None:
     result = runner.invoke(app, ["sync", "--chain", "solana"])
 
     assert result.exit_code == 1
-    assert "Chain 'solana' not supported" in result.stdout
+    assert "Chain 'solana' is not supported" in result.stderr
 
 
 def test_sync_unsupported_destination(monkeypatch) -> None:
@@ -308,7 +308,7 @@ def test_sync_unsupported_destination(monkeypatch) -> None:
     result = runner.invoke(app, ["sync", "--destination", "s3"])
 
     assert result.exit_code == 1
-    assert "Destination 's3' not supported" in result.stdout
+    assert "Destination 's3' is not supported" in result.stderr
 
 
 def test_status_unsupported_chain(monkeypatch) -> None:
@@ -319,7 +319,7 @@ def test_status_unsupported_chain(monkeypatch) -> None:
     result = runner.invoke(app, ["status", "--chain", "polygon"])
 
     assert result.exit_code == 1
-    assert "Chain 'polygon' not supported" in result.stdout
+    assert "Chain 'polygon' is not supported" in result.stderr
 
 
 def test_status_base_chain(monkeypatch) -> None:
@@ -375,13 +375,13 @@ def test_resume_no_checkpoint_fallback(monkeypatch) -> None:
         def load_checkpoint(self, chain: str) -> None:
             return None
 
-        def load_block(self, block: Block) -> None:
+        def load_block(self, block: Block, chain: str) -> None:
             FakeLoader.last_loaded = block
 
         def save_checkpoint(self, checkpoint: Checkpoint) -> None:
             pass
 
-        def detect_reorg(self, block: Block) -> bool:
+        def detect_reorg(self, chain: str, new_block: Block) -> bool:
             return False
 
     monkeypatch.setattr("chainetl.cli.EthereumExtractor", FakeExtractor)
@@ -423,13 +423,13 @@ def test_sync_detects_reorg(monkeypatch) -> None:
         def load_checkpoint(self, chain: str) -> None:
             return None
 
-        def load_block(self, block: Block) -> None:
+        def load_block(self, block: Block, chain: str) -> None:
             pass
 
         def save_checkpoint(self, checkpoint: Checkpoint) -> None:
             pass
 
-        def detect_reorg(self, block: Block) -> bool:
+        def detect_reorg(self, chain: str, new_block: Block) -> bool:
             return True  # Simulate reorg detection
 
     monkeypatch.setattr("chainetl.cli.EthereumExtractor", FakeExtractor)
@@ -473,13 +473,13 @@ def test_sync_batch_detects_reorg(monkeypatch) -> None:
         def load_checkpoint(self, chain: str) -> None:
             return None
 
-        def load_blocks(self, blocks: list[Block]) -> None:
+        def load_blocks(self, blocks: list[Block], chain: str) -> None:
             pass
 
         def save_checkpoint(self, checkpoint: Checkpoint) -> None:
             pass
 
-        def detect_reorg(self, block: Block) -> bool:
+        def detect_reorg(self, chain: str, new_block: Block) -> bool:
             return True  # Simulate reorg
 
     monkeypatch.setattr("chainetl.cli.EthereumExtractor", FakeExtractor)
@@ -522,13 +522,13 @@ def test_sync_large_batch_with_progress(monkeypatch) -> None:
         def load_checkpoint(self, chain: str) -> None:
             return None
 
-        def load_blocks(self, blocks: list[Block]) -> None:
+        def load_blocks(self, blocks: list[Block], chain: str) -> None:
             FakeLoader.loaded_blocks.extend(blocks)
 
         def save_checkpoint(self, checkpoint: Checkpoint) -> None:
             pass
 
-        def detect_reorg(self, block: Block) -> bool:
+        def detect_reorg(self, chain: str, new_block: Block) -> bool:
             return False
 
     monkeypatch.setattr("chainetl.cli.EthereumExtractor", FakeExtractor)
@@ -573,7 +573,7 @@ def test_sync_exception_handling(monkeypatch) -> None:
     result = runner.invoke(app, ["sync", "--start-block", "18000000"])
 
     assert result.exit_code == 1
-    assert "Sync failed" in result.stdout
+    assert "Sync failed" in result.stderr
 
 
 def test_status_exception_handling(monkeypatch) -> None:

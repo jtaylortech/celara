@@ -33,7 +33,7 @@ jobs:
           DATABASE_URL: sqlite:///test.db
           ETHEREUM_RPC_URL: https://eth.llamarpc.com
           BASE_RPC_URL: https://mainnet.base.org
-        run: uv run pytest
+        run: uv run pytest -m "not integration"
 
       - name: Build package
         run: uv build
