@@ -1,5 +1,9 @@
 # ChainETL
 
+[![PyPI version](https://badge.fury.io/py/chainetl.svg)](https://pypi.org/project/chainetl/)
+[![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
+[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://github.com/jtaylortech/celara/blob/main/chainetl/LICENSE)
+
 Production-grade blockchain data pipelines. Extract blockchain data to data warehouses with ease.
 
 **Supported Chains**: Ethereum, Base L2
@@ -7,6 +11,12 @@ Production-grade blockchain data pipelines. Extract blockchain data to data ware
 ## What is ChainETL?
 
 ChainETL is an open-source tool for extracting, transforming, and loading blockchain data into analytics-ready formats. Think of it as the Airbyte/Fivetran for blockchain data.
+
+**Quick Links:**
+- [PyPI Package](https://pypi.org/project/chainetl/)
+- [GitHub Repository](https://github.com/jtaylortech/celara/tree/main/chainetl)
+- [Documentation](https://github.com/jtaylortech/celara/blob/main/chainetl/README.md)
+- [Changelog](https://github.com/jtaylortech/celara/blob/main/chainetl/CHANGELOG.md)
 
 ### Key Features
 
@@ -28,13 +38,18 @@ ChainETL is an open-source tool for extracting, transforming, and loading blockc
 
 ### Installation
 
-Install from PyPI (recommended):
+**Recommended:** Install from PyPI
 
 ```bash
 pip install chainetl
 ```
 
-Or install from source using uv:
+Verify installation:
+```bash
+chainetl --help
+```
+
+**Alternative:** Install from source using uv
 
 ```bash
 # Clone the repository
