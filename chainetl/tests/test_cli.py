@@ -28,6 +28,9 @@ def test_sync_cli_monkeypatched(monkeypatch) -> None:
                 transactions=[],
             )
 
+        def close(self) -> None:
+            pass
+
     # Fake loader that records the last loaded block
     class FakeLoader:
         last_loaded = None
@@ -130,6 +133,9 @@ def test_sync_with_base_chain(monkeypatch) -> None:
                 transactions=[],
             )
 
+        def close(self) -> None:
+            pass
+
     class FakeLoader:
         last_loaded = None
 
@@ -176,6 +182,9 @@ def test_sync_with_resume(monkeypatch) -> None:
                 timestamp=1234567890,
                 transactions=[],
             )
+
+        def close(self) -> None:
+            pass
 
     class FakeLoader:
         last_loaded = None
@@ -234,6 +243,9 @@ def test_sync_batch_processing(monkeypatch) -> None:
                 for i in range(start_block, end_block + 1)
             ]
 
+        def close(self) -> None:
+            pass
+
     class FakeLoader:
         loaded_blocks = []
 
@@ -283,6 +295,9 @@ def test_sync_unsupported_destination(monkeypatch) -> None:
 
     class FakeExtractor:
         def __init__(self, rpc_url: str) -> None:
+            pass
+
+        def close(self) -> None:
             pass
 
     monkeypatch.setattr("chainetl.cli.EthereumExtractor", FakeExtractor)
@@ -348,6 +363,9 @@ def test_resume_no_checkpoint_fallback(monkeypatch) -> None:
                 transactions=[],
             )
 
+        def close(self) -> None:
+            pass
+
     class FakeLoader:
         last_loaded = None
 
@@ -394,6 +412,9 @@ def test_sync_detects_reorg(monkeypatch) -> None:
                 timestamp=1234567890,
                 transactions=[],
             )
+
+        def close(self) -> None:
+            pass
 
     class FakeLoader:
         def __init__(self, connection_string: str) -> None:
@@ -442,6 +463,9 @@ def test_sync_batch_detects_reorg(monkeypatch) -> None:
                 for i in range(start_block, end_block + 1)
             ]
 
+        def close(self) -> None:
+            pass
+
     class FakeLoader:
         def __init__(self, connection_string: str) -> None:
             pass
@@ -486,6 +510,9 @@ def test_sync_large_batch_with_progress(monkeypatch) -> None:
                 transactions=[],
             )
 
+        def close(self) -> None:
+            pass
+
     class FakeLoader:
         loaded_blocks = []
 
@@ -526,6 +553,9 @@ def test_sync_exception_handling(monkeypatch) -> None:
 
         def extract_block(self, block_number: int) -> Block:
             raise ValueError("RPC connection failed")
+
+        def close(self) -> None:
+            pass
 
     class FakeLoader:
         def __init__(self, connection_string: str) -> None:
