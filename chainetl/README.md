@@ -28,7 +28,13 @@ ChainETL is an open-source tool for extracting, transforming, and loading blockc
 
 ### Installation
 
-Install using uv (recommended):
+Install from PyPI (recommended):
+
+```bash
+pip install chainetl
+```
+
+Or install from source using uv:
 
 ```bash
 # Clone the repository
