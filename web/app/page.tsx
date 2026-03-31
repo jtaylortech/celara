@@ -2,7 +2,7 @@ import Link from "next/link";
 
 const products = [
   { name: "ChainOps", desc: "Infrastructure-as-Code for validators", status: "building", href: "/chainops" },
-  { name: "ChainETL", desc: "Blockchain data pipelines", status: "building", href: "/chainetl" },
+  { name: "ChainETL", desc: "Blockchain data pipelines", status: "live", href: "/chainetl" },
   { name: "ChainWatch", desc: "Observability for decentralized systems", status: "soon", href: null },
   { name: "SecurityKit", desc: "Automated security for node operators", status: "soon", href: null },
   { name: "DAOForm", desc: "Governance-as-Code", status: "soon", href: null },
@@ -32,7 +32,7 @@ export default function Home() {
                   <span className="text-sm text-[var(--muted)]">{product.desc}</span>
                 </div>
                 <span className="text-xs text-[var(--muted)] opacity-60">
-                  {product.status === "building" ? "In development" : "Coming soon"}
+                  {product.status === "live" ? "Available on PyPI" : product.status === "building" ? "In development" : "Coming soon"}
                 </span>
               </>
             );

@@ -22,12 +22,30 @@ export default function ChainETL() {
 
         <div className="mt-12 space-y-6 text-[var(--muted)] leading-relaxed">
           <p>
-            Extract blockchain data and load it into your data warehouse. 
+            Extract blockchain data and load it into your data warehouse.
             Real-time and batch processing for Ethereum, Base, and more.
           </p>
           <p>
-            Stop writing custom indexers. Get clean, typed data in Parquet, 
+            Stop writing custom indexers. Get clean, typed data in Parquet,
             JSON, or direct to your database.
+          </p>
+        </div>
+
+        <div className="mt-12 space-y-3">
+          <h2 className="text-sm font-medium text-[var(--text)]">Installation</h2>
+          <div className="bg-[#1a1a1a] border border-[var(--border)] rounded-lg p-4">
+            <code className="text-sm text-[var(--accent)]">pip install chainetl</code>
+          </div>
+          <p className="text-xs text-[var(--muted)]">
+            Requires Python 3.11+ • Available on{" "}
+            <a
+              href="https://pypi.org/project/chainetl/"
+              className="text-[var(--accent)] hover:underline underline-offset-4"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              PyPI
+            </a>
           </p>
         </div>
 
